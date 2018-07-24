@@ -78,20 +78,19 @@ contract WeightWagers is usingOraclize{
   }
   
   function __callback(bytes32 myid, string result) public {
-
     if (msg.sender != oraclize_cbAddress()) revert();
     if (wagersBeingActivated[myid].expiration != 0) {
       Wager memory newWager = wagersBeingActivated[myid];
-      //DJSFIXME Delete wager from wagersBeingActivated
       newWager.startWeight = parseInt(result);
       wagers[newWager.wagerer].push(newWager);
+      delete wagersBeingActivated[myid];
       emit WagerActivated(newWager.wagerer, newWager.wagerAmount);
       //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingActivated
       //         on function exit no matter what, so that wagersBeingActivated doesn't
       //         slowly bloat into tons of data that no one needs
-    }
+    } else if (wagersBeingVerified[myid].wagerer != address(0)) {
+      WagerVerified(wagersBeingVerified[myid].wagerer, 200);
 
-    //DJSFIXME If myid is in wagersBeingVerified
     //VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
     //Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
     //If parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange);
@@ -105,20 +104,20 @@ contract WeightWagers is usingOraclize{
     //         on function exit no matter what, so that wagersBeingVerified doesn't
     //         slowly bloat into tons of data that no one needs
 
+    }
     //DJSFIXME else (if myid is nowhere)
     //DJSFIXME then emit InvalidWager(myid);
     //DJSFIXME then do nothing?
   }
 
   function verifyWager(uint _wagerIndex) public {
-    //Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
+    Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
     //DJSFIXME concat the smartScaleID from the wager onto the URL
     //DJSFIXME if statement to verify that this wager hasn't expired.
     //DJSFIXME If the wager has expired, delete it from the wagers
     //DJSFIXME emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
     //DJSFIXME If the wager has not expired, do the following.
-    //bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
-    bytes32 myID = "ab";
+    bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
     wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
     emit WagerBeingVerified(msg.sender, _wagerIndex);
   }
