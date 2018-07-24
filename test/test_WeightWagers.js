@@ -87,8 +87,9 @@ contract('WeightWagers', accounts => {
 
     //Set up listener so we can pause execution
     //until wager is activated
-    //const logScaleWatcher = logWatchPromise(weightWagers.WagerActivated({ fromBlock: 'latest'} ));
-    //log = await logScaleWatcher;
+    const logScaleWatcher = logWatchPromise(weightWagers.WagerActivated({ fromBlock: 'latest'} ));
+    log = await logScaleWatcher;
+    assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 
     const verifyResponse = await weightWagers.verifyWager(0, {from: alice});
     log = verifyResponse.logs[0];
