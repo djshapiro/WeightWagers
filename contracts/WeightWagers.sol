@@ -55,7 +55,7 @@ contract WeightWagers is usingOraclize{
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
 
-  function WeightWagers() {
+  function WeightWagers() payable {
     rewardMultiplier = 100;
     OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
@@ -111,13 +111,14 @@ contract WeightWagers is usingOraclize{
   }
 
   function verifyWager(uint _wagerIndex) public {
-    Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
+    //Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
     //DJSFIXME concat the smartScaleID from the wager onto the URL
     //DJSFIXME if statement to verify that this wager hasn't expired.
     //DJSFIXME If the wager has expired, delete it from the wagers
     //DJSFIXME emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
     //DJSFIXME If the wager has not expired, do the following.
-    bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
+    //bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
+    bytes32 myID = "ab";
     wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
     emit WagerBeingVerified(msg.sender, _wagerIndex);
   }
