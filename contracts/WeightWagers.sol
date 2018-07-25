@@ -75,6 +75,7 @@ contract WeightWagers is usingOraclize{
     bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
     wagersBeingActivated[myID] = Wager(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(_expiration, _desiredWeightChange, msg.value, _smartScaleID);
+    emit Debug(now + _expiration, now);
   }
   
   function __callback(bytes32 myid, string result) public {
@@ -115,12 +116,12 @@ contract WeightWagers is usingOraclize{
     if (wagerToVerify.expiration < now) {
       //DJSFIXME delete the wager
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
-      //emit Debug(wagerToVerify.expiration, now);
+      emit Debug(wagerToVerify.expiration, now);
     } else {
       bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
       emit WagerBeingVerified(msg.sender, _wagerIndex);
-      //emit Debug(wagerToVerify.expiration, now);
+      emit Debug(wagerToVerify.expiration, now);
     }
   }
 
