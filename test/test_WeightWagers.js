@@ -49,12 +49,9 @@ contract('WeightWagers', accounts => {
   
   it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
-    const expiration = 1000;
-    const weightChange = 20;
-    const smartScaleId = "always200Pounds";
 
     //Chubbs creates a wager.
-    const response = await weightWagers.createWager(expiration, weightChange, smartScaleId, {from: chubbs});
+    const response = await weightWagers.createWager(1000, 20, "always200Pounds", {from: chubbs});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -67,13 +64,11 @@ contract('WeightWagers', accounts => {
     //Finally, call getWagers() for Chubbs to ensure
     //that he has a wager.
     const chubbsWagers = await weightWagers.getWagers({from: chubbs});
-    assert.equal(chubbsWagers[0][0], expiration, 'Chubbs does not have the correct expiration date on her wager');
-    assert.equal(chubbsWagers[1][0], weightChange, 'Chubbs does not have the correct target weight');
+    assert.equal(chubbsWagers[1][0], 20, 'Chubbs does not have the correct target weight');
     assert.equal(chubbsWagers[2][0], 0, 'Chubbs does not have the correct amount');
 
     //And just for a reality check, make sure Al has no wagers.
     const alWagers = await weightWagers.getWagers({from: al_roker});
-    assert.deepEqual(alWagers[0], [], "Al's expiration dates are not an empty array");
     assert.deepEqual(alWagers[1], [], "Al's target weights are not an empty array");
     assert.deepEqual(alWagers[2], [], "Al's wager amounts are not an empty array");
 
@@ -95,7 +90,6 @@ contract('WeightWagers', accounts => {
     //Finally, call getWagers() for Chubbs to ensure
     //that he still has a wager.
     const chubbsWagers = await weightWagers.getWagers({from: chubbs});
-    assert.equal(chubbsWagers[0][0], 1000, 'Chubbs does not have the correct expiration date on her wager');
     assert.equal(chubbsWagers[1][0], 20, 'Chubbs does not have the correct target weight');
     assert.equal(chubbsWagers[2][0], 0, 'Chubbs does not have the correct amount');
   });
@@ -106,6 +100,27 @@ contract('WeightWagers', accounts => {
 
   it('create a wager and attempt to verify it after it has expired', async () => {
     const weightWagers = await WeightWagers.deployed();
+
+    //Chubbs creates a wager.
+    const response = await weightWagers.createWager(1, 20, "always200Pounds", {from: chubbs});
+    let log = response.logs[0];
+    assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
+
+    //Set up listener to make sure the wager gets
+    //activated once the oracle returns data.
+    const logScaleWatcher = logWatchPromise(weightWagers.WagerActivated({ fromBlock: 'latest'} ));
+    log = await logScaleWatcher;
+    assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
+
+    const verifyResponse = await weightWagers.verifyWager(0, {from: chubbs});
+    log = verifyResponse.logs[0];
+    assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
+
+    //Set up listener to make sure the wager gets
+    //activated once the oracle returns data.
+    const logScaleWatcher2 = logWatchPromise(weightWagers.WagerUnchanged({ fromBlock: 'latest'} ));
+    log = await logScaleWatcher2;
+    assert.equal(log.event, 'WagerUnchanged', 'WagerUnchanged not emitted.');
   });
 
   it('attempt to verify a wager that does not exist', async () => {

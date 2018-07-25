@@ -7,7 +7,7 @@ contract WeightWagers is usingOraclize{
   uint rewardMultiplier;
 
   struct Wager {
-    uint expiration; //timestamp after which the wager needs to be evaluated
+    uint expiration; //timestamp after which the contract is deemed "expired"
     uint desiredWeightChange; //amount of weight wagerer wants to lose
     uint wagerAmount; //amount this person wagered
     string smartScaleID; //The user's "credentials" for their smart scale
@@ -73,13 +73,13 @@ contract WeightWagers is usingOraclize{
 
     //DJSFIXME Uncomment this when you are just messing around. Delete this before submitting.
     bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
-    wagersBeingActivated[myID] = Wager(_expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
+    wagersBeingActivated[myID] = Wager(_expiration + now, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(_expiration, _desiredWeightChange, msg.value, _smartScaleID);
   }
   
   function __callback(bytes32 myid, string result) public {
     if (msg.sender != oraclize_cbAddress()) revert();
-    if (wagersBeingActivated[myid].expiration != 0) {
+    if (wagersBeingActivated[myid].wagerer != address(0)) {
       Wager memory newWager = wagersBeingActivated[myid];
       newWager.startWeight = parseInt(result);
       wagers[newWager.wagerer].push(newWager);
