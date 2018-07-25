@@ -57,7 +57,7 @@ contract WeightWagers is usingOraclize{
 
   function WeightWagers() payable {
     rewardMultiplier = 100;
-    OAR = OraclizeAddrResolverI(0x8F6b6cf01D1516c46b8D7445b87ba13D31e8205e);
+    OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
 
   //The user calls this function when they want to create a wager
@@ -125,7 +125,10 @@ contract WeightWagers is usingOraclize{
     }
   }
 
+  event GettingWagers();
+
   function getWagers() public view returns (uint[] expirations, uint[] desiredWeightChanges, uint[] values) {
+    emit GettingWagers();
     expirations = new uint[](wagers[msg.sender].length);
     desiredWeightChanges = new uint[](wagers[msg.sender].length);
     values = new uint[](wagers[msg.sender].length);

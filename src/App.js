@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import WeightWagers from '../build/contracts/WeightWagers.json'
 import getWeb3 from './utils/getWeb3'
+import _ from 'underscore';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -10,12 +10,16 @@ import './App.css'
 
 class App extends Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     this.state = {
       storageValue: 0,
-      web3: null
+      web3: null,
+      wagers: null,
     }
+
+    this.instantiateContract = this.instantiateContract.bind(this);
+    this.contractEvent = this.contractEvent.bind(this);
   }
 
   componentWillMount() {
@@ -45,27 +49,55 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const simpleStorage = contract(SimpleStorageContract)
-    simpleStorage.setProvider(this.state.web3.currentProvider)
+    const weightWagers = contract(WeightWagers)
+    weightWagers.setProvider(this.state.web3.currentProvider)
 
     // Declaring this for later so we can chain functions on SimpleStorage.
-    var simpleStorageInstance
+    var weightWagersInstance;
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
-      simpleStorage.deployed().then((instance) => {
-        simpleStorageInstance = instance
+      weightWagers.deployed().then((instance) => {
+        weightWagersInstance = instance
+
+        /*weightWagersInstance.GettingWagers((err, value) => {
+          console.log(JSON.stringify(value, null, 2));
+        });
+        weightWagersInstance.WagerCreated((err, value) => {
+          console.log(JSON.stringify(value, null, 2));
+        });*/
+        return weightWagersInstance.getWagers({from: accounts[0]});
+      }).then((result, err) => {
+        console.log({result, err});
+
+        //Solidity can't return a deep object, so
+        //in order to get all the user's wagers,
+        //we have to deal with an array of arrays.
+        const organizedWagers = _.zip(result[0], result[1], result[2]);
+        const wagers = organizedWagers.length === 0 ? null : organizedWagers;
+        this.setState({
+          wagers: wagers
+        });
+        //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
 
         // Stores a given value, 5 by default.
-        return simpleStorageInstance.set(5, {from: accounts[0]})
+      /*  return simpleStorageInstance.set(5, {from: accounts[0]})
       }).then((result) => {
         // Get the value from the contract to prove it worked.
         return simpleStorageInstance.get.call(accounts[0])
       }).then((result) => {
         // Update state with the result.
-        return this.setState({ storageValue: result.c[0] })
+        return this.setState({ storageValue: result.c[0] })*/
       })
     })
+  }
+
+  contractEvent(err, value) {
+    console.log(JSON.stringify(value, null, 2));
+  }
+
+  onFormSubmit(a, b, c) {
+    console.log({a, b, c});
   }
 
   render() {
@@ -78,12 +110,36 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.storageValue}</p>
+              {this.state.wagers && 
+                <div>
+                  <h2>Your wagers</h2>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <th> expiration </th>
+                        <th> desired weight change </th>
+                        <th> wager amount </th>
+                        <th> start weight </th>
+                      </tr>
+                      {this.state.wagers.map( (wager) => {
+                        return (
+                          <tr>
+                            <td>{(new Date(wager[0].toNumber() * 1000)).toUTCString()}</td>
+                            <td>{wager[1].toNumber()}</td>
+                            <td>{wager[2].toNumber()}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              }
+              <h2>Create a new wager</h2>
+              <input name="expiration" placeholder="expiration"/>
+              <input name="desiredWeightChange" placeholder="desired weight change"/>
+              <input name="scaleID" placeholder="scaleID"/>
+              <input name="amountToWager" placeholder="amount to wager"/>
+              <button type="submit" onClick={this.onFormSubmit.bind(this)}>Create Wager</button>
             </div>
           </div>
         </main>
