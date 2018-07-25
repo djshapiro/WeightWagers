@@ -89,21 +89,18 @@ contract WeightWagers is usingOraclize{
       //         on function exit no matter what, so that wagersBeingActivated doesn't
       //         slowly bloat into tons of data that no one needs
     } else if (wagersBeingVerified[myid].wagerer != address(0)) {
-      WagerVerified(wagersBeingVerified[myid].wagerer, 200);
-
-    //VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
-    //Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
-    //If parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange);
-    //DJSFIXME then Send wagerToVerify.value * rewardMultipier / 100 to wagerToVerify.wagerer.
-    //DJSFIXME emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
-    //DJSFIXME else (they didn't lose the weight)
-    //DJSFIXME then do nothing (give them a chance to keep losing weight until the wager expires)
-    //DJSFIXME emit WagerUnchanged(myid);
-    
-    //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingVerified
-    //         on function exit no matter what, so that wagersBeingVerified doesn't
-    //         slowly bloat into tons of data that no one needs
-
+      VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
+      Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
+      delete wagersBeingVerified[myid];
+      if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
+        //DJSFIXME then Send wagerToVerify.value * rewardMultipier / 100 to wagerToVerify.wagerer.
+        //DJSFIXME emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+      } else {
+        emit WagerUnchanged(myid);
+        //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingVerified
+        //         on function exit no matter what, so that wagersBeingVerified doesn't
+        //         slowly bloat into tons of data that no one needs
+      }
     }
     //DJSFIXME else (if myid is nowhere)
     //DJSFIXME then emit InvalidWager(myid);
