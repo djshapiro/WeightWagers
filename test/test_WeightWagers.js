@@ -108,7 +108,7 @@ contract('WeightWagers', accounts => {
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 
-    const verifyResponse = await weightWagers.verifyWager(0, {from: chubbs});
+    const verifyResponse = await weightWagers.verifyWager(1, {from: chubbs});
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerExpired', 'WagerExpired not emitted.');
   });
