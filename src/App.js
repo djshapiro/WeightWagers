@@ -97,7 +97,15 @@ class App extends Component {
   }
 
   onFormSubmit(a, b, c) {
-    console.log({a, b, c});
+    const expiration = this.expiration;
+    const desiredWeightChange = this.desiredWeightChange;
+    const scaleID = this.scaleID;
+    const amountToWager = this.amountToWager;
+    console.log({expiration, desiredWeightChange, scaleID, amountToWager});
+  }
+
+  handleInputChange(inputName, e) {
+    this[inputName] = e.target.value;
   }
 
   render() {
@@ -135,10 +143,10 @@ class App extends Component {
                 </div>
               }
               <h2>Create a new wager</h2>
-              <input name="expiration" placeholder="expiration"/>
-              <input name="desiredWeightChange" placeholder="desired weight change"/>
-              <input name="scaleID" placeholder="scaleID"/>
-              <input name="amountToWager" placeholder="amount to wager"/>
+              <input name="expiration" placeholder="expiration" onChange={this.handleInputChange.bind(this, "expiration")}/>
+              <input name="desiredWeightChange" placeholder="desired weight change" onChange={this.handleInputChange.bind(this, "desiredWeightChange")}/>
+              <input name="scaleID" placeholder="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")}/>
+              <input name="amountToWager" placeholder="amount to wager" onChange={this.handleInputChange.bind(this, "amountToWager")}/>
               <button type="submit" onClick={this.onFormSubmit.bind(this)}>Create Wager</button>
             </div>
           </div>
