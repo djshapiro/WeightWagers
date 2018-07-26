@@ -157,12 +157,12 @@ contract('WeightWagers', accounts => {
     assert.equal(log.event, 'WagerVerified', 'WagerVerified not emitted.');
 
     const billyEndingBalance = await web3.eth.getBalance(billy_halleck).toNumber();
-
-    //let's find out if Billy got paid
-    assert.equal(billyEndingBalance - billyBeginningBalance, 0, "billy didn't get paid the right amount");
     console.log(billyEndingBalance);
     console.log(billyBeginningBalance);
     console.log(billyEndingBalance - billyBeginningBalance);
+    //let's find out if Billy got paid
+    assert.equal(billyEndingBalance - billyBeginningBalance, 0, "billy didn't get paid the right amount");
+
 
   });
 
