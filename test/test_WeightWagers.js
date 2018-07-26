@@ -10,7 +10,7 @@ function logWatchPromise(_event) {
       resolve(log);
     });
     //Time out after 15 seconds
-    setTimeout(() => reject('timed out'), 15000);
+    setTimeout(() => reject('timed out'), 30000);
   });
 }
 
@@ -47,7 +47,7 @@ contract('WeightWagers', accounts => {
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   
-  it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
+  /*it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Chubbs creates a wager.
@@ -128,13 +128,13 @@ contract('WeightWagers', accounts => {
     //Because we deleted the wager, it still exists but all the fields are
     //reinitialized to zero
     assert.equal(chubbsWagers[1][1], 0, "Chubbs' second wager has a desired weight change that isn't zero.");
-  });
+  });*/
 
   it('create a wager and attempt to verify it after having lost the weight', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Billy creates a wager.
-    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 32});
+    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 32000});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -148,11 +148,19 @@ contract('WeightWagers', accounts => {
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
 
+    const billyBeginningBalance = await web3.eth.getBalance(billy_halleck)
+
     //Set up listener to make sure the wager gets
     //activated once the oracle returns data.
     logScaleWatcher = logWatchPromise(weightWagers.WagerVerified({ fromBlock: 'latest'} ));
     log = await logScaleWatcher;
-    assert.equal(log.event, 'WagerVeirified', 'WagerVerified not emitted.');
+    assert.equal(log.event, 'WagerVerified', 'WagerVerified not emitted.');
+
+    const billyEndingBalance = await web3.eth.getBalance(billy_halleck);
+
+    //let's find out if Billy got paid
+    assert.equal(billyEndingBalance - billyBeginningBalance, 32768, "billy didn't get paid the right amount");
+
   });
 
   it('attempt to verify a wager that does not exist', async () => {

@@ -13,9 +13,10 @@ class App extends Component {
     super(props);
 
     this.state = {
-      storageValue: 0,
       web3: null,
       wagers: null,
+      weightWagersInstance: null,
+      account: null,
     }
 
     this.instantiateContract = this.instantiateContract.bind(this);
@@ -54,6 +55,7 @@ class App extends Component {
 
     // Declaring this for later so we can chain functions on SimpleStorage.
     var weightWagersInstance;
+    var _this = this;
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -68,16 +70,26 @@ class App extends Component {
         });*/
         return weightWagersInstance.getWagers({from: accounts[0]});
       }).then((result, err) => {
-        console.log({result, err});
-
         //Returning an array of arrays in the best way
         //Solidity can return all the user's wagers, so
         //lets transform the data into a useful format
+        let wagers;
         const organizedWagers = _.zip(result[0], result[1], result[2]);
-        const wagers = organizedWagers.length === 0 ? null : organizedWagers;
-        //DJSFIXME filter out old wagers (expiration === 0)
-        this.setState({
-          wagers: wagers
+        if (organizedWagers.length === 0) {
+          wagers = null;
+        } else {
+          wagers = organizedWagers.map((wager) => {
+            return [
+              (new Date(wager[0].toNumber() * 1000)).toUTCString(),
+              wager[1].toNumber(),
+              wager[2].toNumber(),
+            ];
+          });
+        }
+        _this.setState({
+          wagers: wagers,
+          weightWagersInstance: weightWagersInstance,
+          account: accounts[0],
         });
         //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
 
@@ -103,6 +115,7 @@ class App extends Component {
     const scaleID = this.scaleID;
     const amountToWager = this.amountToWager;
     console.log({expiration, desiredWeightChange, scaleID, amountToWager});
+    this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager});
   }
 
   handleInputChange(inputName, e) {
@@ -130,7 +143,7 @@ class App extends Component {
                         <th> wager amount </th>
                         <th> start weight </th>
                       </tr>
-                      {this.state.wagers.map( (wager) => {
+                      {/*this.state.wagers.map( (wager) => {
                         return (
                           <tr>
                             <td>{(new Date(wager[0].toNumber() * 1000)).toUTCString()}</td>
@@ -138,7 +151,18 @@ class App extends Component {
                             <td>{wager[2].toNumber()}</td>
                           </tr>
                         );
-                      })}
+                      })*/}
+                      {this.state.wagers.map( (wager) => {
+                        if (wager[0] !== 0) {
+                          return (
+                            <tr>
+                              <td>{wager[0]}</td>
+                              <td>{wager[1]}</td>
+                              <td>{wager[2]}</td>
+                            </tr>
+                          );
+                        }})
+                      }
                     </tbody>
                   </table>
                 </div>
