@@ -51,7 +51,7 @@ contract('WeightWagers', accounts => {
     const weightWagers = await WeightWagers.deployed();
 
     //Chubbs creates a wager.
-    const response = await weightWagers.createWager(1000, 20, "always200Pounds", {from: chubbs});
+    const response = await weightWagers.createWager(1000, 20, "always200Pounds", {from: chubbs, value: web3.toWei(0.5, "ether")});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
