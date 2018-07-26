@@ -45,8 +45,8 @@ contract WeightWagers is usingOraclize{
   // event for when a user attempts to verify a wager
   event WagerBeingVerified(address verifierAddress, uint wagerIndex);
   // event for when a wager is verified
-  //event WagerVerified(address wagerer, uint wagerAmount);
-  event WagerVerified(uint result, uint startWeight, uint desiredWeightChange);
+  event WagerVerified(address wagerer, uint wagerAmount);
+  //event WagerVerified(uint result, uint startWeight, uint desiredWeightChange);
   // event for when a wager is expired - called after a user
   // attempts to verify a wager and the contract discovers
   // that the wager has expired
@@ -79,6 +79,8 @@ contract WeightWagers is usingOraclize{
     wagersBeingActivated[myID] = Wager(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID);
   }
+
+  event WantToSend(uint, uint, uint);
   
   function __callback(bytes32 myid, string result) public {
     if (msg.sender != oraclize_cbAddress()) revert();
@@ -96,9 +98,10 @@ contract WeightWagers is usingOraclize{
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
       delete wagersBeingVerified[myid];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
-        //DJSFIXME then Send wagerToVerify.value * rewardMultipier / 100 to wagerToVerify.wagerer.
-        //emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
-        emit WagerVerified(parseInt(result), wagerToVerify.startWeight, wagerToVerify.desiredWeightChange);
+        //DJSFIXME then Send wagerToVerify.wagerAmount * rewardMultipier / 100 to wagerToVerify.wagerer.
+        emit WantToSend(rewardMultiplier, wagerToVerify.wagerAmount, wagerToVerify.wagerAmount * rewardMultiplier/100);
+        emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+        //emit WagerVerified(parseInt(result), wagerToVerify.startWeight, wagerToVerify.desiredWeightChange);
       } else {
         emit WagerUnchanged(myid);
         //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingVerified
@@ -117,8 +120,9 @@ contract WeightWagers is usingOraclize{
       delete wagers[msg.sender][_wagerIndex];
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
     } else {
-      string memory timeDiff = uint2str(now - wagerToVerify.expiration);
-      string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", wagerToVerify.smartScaleID, "/", timeDiff, ").value");
+      //DJSFIXME This is an artifact of when I was doing the time diff thing. Delete if you decide to not do time diffs.
+      //string memory timeDiff = uint2str(now - wagerToVerify.expiration);
+      string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", wagerToVerify.smartScaleID, "/1).value");
       bytes32 myID = oraclize_query("URL", oraclizeURL);
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
       emit WagerBeingVerified(msg.sender, _wagerIndex);

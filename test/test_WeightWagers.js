@@ -134,7 +134,7 @@ contract('WeightWagers', accounts => {
     const weightWagers = await WeightWagers.deployed();
 
     //Billy creates a wager.
-    const response = await weightWagers.createWager(1000, 100, "losesOnePoundPerSecond", {from: billy_halleck});
+    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 32});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -152,7 +152,7 @@ contract('WeightWagers', accounts => {
     //activated once the oracle returns data.
     logScaleWatcher = logWatchPromise(weightWagers.WagerVerified({ fromBlock: 'latest'} ));
     log = await logScaleWatcher;
-    assert.equal(log.event, 'WagerVeriied', 'WagerVerified not emitted.');
+    assert.equal(log.event, 'WagerVeirified', 'WagerVerified not emitted.');
   });
 
   it('attempt to verify a wager that does not exist', async () => {
