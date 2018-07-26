@@ -97,8 +97,13 @@ contract('WeightWagers', accounts => {
   it('create a wager and attempt to verify it after it has expired', async () => {
     const weightWagers = await WeightWagers.deployed();
 
+    //First, make sure Chubbs only has one wager to start with
+    let chubbsWagers = await weightWagers.getWagers({from: chubbs});
+    assert.equal(chubbsWagers[1][0], 20, "Chubbs' first wager has an incorrect desired weight change");
+    assert.equal(chubbsWagers[1][1], undefined, "Chubbs' second wager has a desired weight change.");
+
     //Chubbs creates a wager.
-    const response = await weightWagers.createWager(1, 20, "always200Pounds", {from: chubbs});
+    const response = await weightWagers.createWager(1, 40, "always200Pounds", {from: chubbs});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -108,9 +113,21 @@ contract('WeightWagers', accounts => {
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 
+    //Now that we created the second wager, let's check Chubbs' wagers again
+    chubbsWagers = await weightWagers.getWagers({from: chubbs});
+    assert.equal(chubbsWagers[1][0], 20, "Chubbs' first wager has an incorrect desired weight change");
+    assert.equal(chubbsWagers[1][1], 40, "Chubbs' second wager has an incorrect desired weight change");
+
     const verifyResponse = await weightWagers.verifyWager(1, {from: chubbs});
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerExpired', 'WagerExpired not emitted.');
+
+    //Since that wager is expired, Chubbs should again only have one wager to his name
+    chubbsWagers = await weightWagers.getWagers({from: chubbs});
+    assert.equal(chubbsWagers[1][0], 20, "Chubbs' first wager has an incorrect desired weight change");
+    //Because we deleted the wager, it still exists but all the fields are
+    //reinitialized to zero
+    assert.equal(chubbsWagers[1][1], 0, "Chubbs' second wager has a desired weight change that isn't zero.");
   });
 
   it('create a wager and attempt to verify it after having lost the weight', async () => {

@@ -69,10 +69,10 @@ contract WeightWagers is usingOraclize{
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
 
     //DJSFIXME Uncomment this when you're ready to test verification
-    //bytes32 myID = oraclize_query("URL", oraclizeURL);
+    bytes32 myID = oraclize_query("URL", oraclizeURL);
 
     //DJSFIXME Uncomment this when you are just messing around. Delete this before submitting.
-    bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
+    //bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
     wagersBeingActivated[myID] = Wager(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID);
   }
@@ -109,12 +109,13 @@ contract WeightWagers is usingOraclize{
 
   function verifyWager(uint _wagerIndex) public {
     Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
-    //DJSFIXME concat the smartScaleID from the wager onto the URL
     if (wagerToVerify.expiration < now) {
-      //DJSFIXME delete the wager
+      delete wagers[msg.sender][_wagerIndex];
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
     } else {
-      bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
+      string memory timeDiff = uint2str(now - wagerToVerify.expiration);
+      string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", wagerToVerify.smartScaleID, "/", timeDiff, ").value");
+      bytes32 myID = oraclize_query("URL", oraclizeURL);
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
       emit WagerBeingVerified(msg.sender, _wagerIndex);
     }
