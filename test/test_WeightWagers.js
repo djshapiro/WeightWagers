@@ -134,7 +134,7 @@ contract('WeightWagers', accounts => {
     const weightWagers = await WeightWagers.deployed();
 
     //Billy creates a wager.
-    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 32000});
+    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 33000});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -148,7 +148,7 @@ contract('WeightWagers', accounts => {
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
 
-    const billyBeginningBalance = await web3.eth.getBalance(billy_halleck)
+    const billyBeginningBalance = await web3.eth.getBalance(billy_halleck).toNumber()
 
     //Set up listener to make sure the wager gets
     //activated once the oracle returns data.
@@ -156,10 +156,13 @@ contract('WeightWagers', accounts => {
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerVerified', 'WagerVerified not emitted.');
 
-    const billyEndingBalance = await web3.eth.getBalance(billy_halleck);
+    const billyEndingBalance = await web3.eth.getBalance(billy_halleck).toNumber();
 
     //let's find out if Billy got paid
-    assert.equal(billyEndingBalance - billyBeginningBalance, 32768, "billy didn't get paid the right amount");
+    assert.equal(billyEndingBalance - billyBeginningBalance, 0, "billy didn't get paid the right amount");
+    console.log(billyEndingBalance);
+    console.log(billyBeginningBalance);
+    console.log(billyEndingBalance - billyBeginningBalance);
 
   });
 
