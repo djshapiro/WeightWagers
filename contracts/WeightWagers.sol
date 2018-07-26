@@ -7,6 +7,8 @@ contract WeightWagers is usingOraclize{
   uint rewardMultiplier;
 
   struct Wager {
+    //DJSFIXME you have to store the start time, too, just so
+    //the verify thing can do a time difference
     uint expiration; //timestamp after which the contract is deemed "expired"
     uint desiredWeightChange; //amount of weight wagerer wants to lose
     uint wagerAmount; //amount this person wagered
@@ -43,7 +45,8 @@ contract WeightWagers is usingOraclize{
   // event for when a user attempts to verify a wager
   event WagerBeingVerified(address verifierAddress, uint wagerIndex);
   // event for when a wager is verified
-  event WagerVerified(address wagerer, uint wagerAmount);
+  //event WagerVerified(address wagerer, uint wagerAmount);
+  event WagerVerified(uint result, uint startWeight, uint desiredWeightChange);
   // event for when a wager is expired - called after a user
   // attempts to verify a wager and the contract discovers
   // that the wager has expired
@@ -94,7 +97,8 @@ contract WeightWagers is usingOraclize{
       delete wagersBeingVerified[myid];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
         //DJSFIXME then Send wagerToVerify.value * rewardMultipier / 100 to wagerToVerify.wagerer.
-        //DJSFIXME emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+        //emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+        emit WagerVerified(parseInt(result), wagerToVerify.startWeight, wagerToVerify.desiredWeightChange);
       } else {
         emit WagerUnchanged(myid);
         //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingVerified
@@ -121,10 +125,7 @@ contract WeightWagers is usingOraclize{
     }
   }
 
-  event GettingWagers();
-
   function getWagers() public view returns (uint[] expirations, uint[] desiredWeightChanges, uint[] values) {
-    emit GettingWagers();
     expirations = new uint[](wagers[msg.sender].length);
     desiredWeightChanges = new uint[](wagers[msg.sender].length);
     values = new uint[](wagers[msg.sender].length);

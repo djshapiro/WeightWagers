@@ -70,11 +70,12 @@ class App extends Component {
       }).then((result, err) => {
         console.log({result, err});
 
-        //Solidity can't return a deep object, so
-        //in order to get all the user's wagers,
-        //we have to deal with an array of arrays.
+        //Returning an array of arrays in the best way
+        //Solidity can return all the user's wagers, so
+        //lets transform the data into a useful format
         const organizedWagers = _.zip(result[0], result[1], result[2]);
         const wagers = organizedWagers.length === 0 ? null : organizedWagers;
+        //DJSFIXME filter out old wagers (expiration === 0)
         this.setState({
           wagers: wagers
         });
