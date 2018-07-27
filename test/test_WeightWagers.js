@@ -134,7 +134,7 @@ contract('WeightWagers', accounts => {
     const weightWagers = await WeightWagers.deployed();
 
     //Billy creates a wager.
-    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 33000});
+    const response = await weightWagers.createWager(1000, 100, "losesAllWeightImmediately", {from: billy_halleck, value: 195000});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -148,7 +148,7 @@ contract('WeightWagers', accounts => {
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
 
-    const billyBeginningBalance = await web3.eth.getBalance(billy_halleck).toNumber()
+    const billyBeginningBalance = await web3.eth.getBalance(billy_halleck)
 
     //Set up listener to make sure the wager gets
     //activated once the oracle returns data.
@@ -156,14 +156,12 @@ contract('WeightWagers', accounts => {
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerVerified', 'WagerVerified not emitted.');
 
-    const billyEndingBalance = await web3.eth.getBalance(billy_halleck).toNumber();
-    console.log(billyEndingBalance);
-    console.log(billyBeginningBalance);
-    console.log(billyEndingBalance - billyBeginningBalance);
     //let's find out if Billy got paid
-    assert.equal(billyEndingBalance - billyBeginningBalance, 0, "billy didn't get paid the right amount");
-
-
+    const billyEndingBalance = await web3.eth.getBalance(billy_halleck);
+    //We have to use "isAtLeast" because the verify transaction
+    //actually returns some gas by deleting data from storage
+    //so the actual difference is slightly higher than the wager
+    assert.equal(billyEndingBalance.minus(billyBeginningBalance), Math.round(195000 * 1.031), "billy didn't get paid the right amount");
   });
 
   it('attempt to verify a wager that does not exist', async () => {

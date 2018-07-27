@@ -96,7 +96,6 @@ contract WeightWagers is usingOraclize{
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
       delete wagersBeingVerified[myid];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
-        //DJSFIXME then Send wagerToVerify.wagerAmount * rewardMultipier / 1000 to wagerToVerify.wagerer.
         wagerToVerify.wagerer.send(wagerToVerify.wagerAmount * rewardMultiplier / 1000);
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
       } else {
