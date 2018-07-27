@@ -47,11 +47,11 @@ contract('WeightWagers', accounts => {
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   
-  /*it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
+  it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Chubbs creates a wager.
-    const response = await weightWagers.createWager(1000, 20, "always200Pounds", {from: chubbs, value: web3.toWei(0.5, "ether")});
+    const response = await weightWagers.createWager(1000, 20, "always200Pounds", {from: chubbs, value: 23456});
     let log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
@@ -65,7 +65,7 @@ contract('WeightWagers', accounts => {
     //that he has a wager.
     const chubbsWagers = await weightWagers.getWagers({from: chubbs});
     assert.equal(chubbsWagers[1][0], 20, 'Chubbs does not have the correct target weight');
-    assert.equal(chubbsWagers[2][0], 0, 'Chubbs does not have the correct amount');
+    assert.equal(chubbsWagers[2][0], 23456, 'Chubbs does not have the correct amount');
 
     //And just for a reality check, make sure Al has no wagers.
     const alWagers = await weightWagers.getWagers({from: al_roker});
@@ -91,7 +91,7 @@ contract('WeightWagers', accounts => {
     //that he still has a wager.
     const chubbsWagers = await weightWagers.getWagers({from: chubbs});
     assert.equal(chubbsWagers[1][0], 20, 'Chubbs does not have the correct target weight');
-    assert.equal(chubbsWagers[2][0], 0, 'Chubbs does not have the correct amount');
+    assert.equal(chubbsWagers[2][0], 23456, 'Chubbs does not have the correct amount');
   });
 
   it('create a wager and attempt to verify it after it has expired', async () => {
@@ -128,7 +128,7 @@ contract('WeightWagers', accounts => {
     //Because we deleted the wager, it still exists but all the fields are
     //reinitialized to zero
     assert.equal(chubbsWagers[1][1], 0, "Chubbs' second wager has a desired weight change that isn't zero.");
-  });*/
+  });
 
   it('create a wager and attempt to verify it after having lost the weight', async () => {
     const weightWagers = await WeightWagers.deployed();

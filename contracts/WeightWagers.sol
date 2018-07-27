@@ -7,8 +7,6 @@ contract WeightWagers is usingOraclize{
   uint rewardMultiplier;
 
   struct Wager {
-    //DJSFIXME you have to store the start time, too, just so
-    //the verify thing can do a time difference
     uint expiration; //timestamp after which the contract is deemed "expired"
     uint desiredWeightChange; //amount of weight wagerer wants to lose
     uint wagerAmount; //amount this person wagered
@@ -70,12 +68,8 @@ contract WeightWagers is usingOraclize{
     //But we need to remember to send the ether back in case the callback fails for some reason.
 
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
-
-    //DJSFIXME Uncomment this when you're ready to test verification
     bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
 
-    //DJSFIXME Uncomment this when you are just messing around. Delete this before submitting.
-    //bytes32 myID = oraclize_query("URL", "json(https://api.coinbase.com/v2/prices/ETH-USD/spot).data.amount");
     wagersBeingActivated[myID] = Wager(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID);
   }
