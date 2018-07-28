@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import WeightWagers from '../build/contracts/WeightWagers.json'
 import getWeb3 from './utils/getWeb3'
+import WeightWagersPng from './assets/WeightWagers.png'
 import _ from 'underscore';
 
 import './css/oswald.css'
@@ -131,6 +132,8 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
+              <img src={WeightWagersPng} className="logoImage">
+              </img>
               {this.state.wagers && 
                 <div>
                   <h2>Your wagers</h2>
@@ -166,7 +169,7 @@ class App extends Component {
                   </table>
                 </div>
               }
-              <h2>Create a new wager</h2>
+              <h1>Create a new wager</h1>
               <div className="inputDiv">
                 <label for="expiration">Expiration (in seconds)</label>
                 <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autofocus type="number" className="wagerInput"/>
@@ -184,7 +187,7 @@ class App extends Component {
                 <input name="amountToWager" id="amountToWager" onChange={this.handleInputChange.bind(this, "amountToWager")} type="number" className="wagerInput"/>
               </div>
               <div className="submitButtonDiv">
-                <button type="submit" onClick={this.onFormSubmit.bind(this)}>Create Wager</button>
+                <button type="submit" onClick={this.onFormSubmit.bind(this)} className="submitButton">Create Wager</button>
               </div>
             </div>
           </div>
