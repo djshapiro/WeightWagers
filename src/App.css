@@ -66,3 +66,19 @@ code {
   height: 16px;
   margin-right: 10px;
 }
+
+.inputDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wagerInput {
+  margin-bottom: 20px;
+}
+
+.submitButtonDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

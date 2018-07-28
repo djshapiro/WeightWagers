@@ -114,7 +114,6 @@ class App extends Component {
     const desiredWeightChange = this.desiredWeightChange;
     const scaleID = this.scaleID;
     const amountToWager = this.amountToWager;
-    console.log({expiration, desiredWeightChange, scaleID, amountToWager});
     this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager});
   }
 
@@ -168,11 +167,25 @@ class App extends Component {
                 </div>
               }
               <h2>Create a new wager</h2>
-              <input name="expiration" placeholder="expiration" onChange={this.handleInputChange.bind(this, "expiration")}/>
-              <input name="desiredWeightChange" placeholder="desired weight change" onChange={this.handleInputChange.bind(this, "desiredWeightChange")}/>
-              <input name="scaleID" placeholder="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")}/>
-              <input name="amountToWager" placeholder="amount to wager" onChange={this.handleInputChange.bind(this, "amountToWager")}/>
-              <button type="submit" onClick={this.onFormSubmit.bind(this)}>Create Wager</button>
+              <div className="inputDiv">
+                <label for="expiration">Expiration (in seconds)</label>
+                <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autofocus type="number" className="wagerInput"/>
+              </div>
+              <div className="inputDiv">
+                <label for="desiredWeightChange">Desired Weight Change (in lbs)</label>
+                <input name="desiredWeightChange" id="desiredWeightChange" onChange={this.handleInputChange.bind(this, "desiredWeightChange")} type="number" className="wagerInput"/>
+              </div>
+              <div className="inputDiv">
+                <label for="scaleID">Smart Scale ID</label>
+                <input name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput"/>
+              </div>
+              <div className="inputDiv">
+                <label for="amountToWager">Amount to wager (in wei)</label>
+                <input name="amountToWager" id="amountToWager" onChange={this.handleInputChange.bind(this, "amountToWager")} type="number" className="wagerInput"/>
+              </div>
+              <div className="submitButtonDiv">
+                <button type="submit" onClick={this.onFormSubmit.bind(this)}>Create Wager</button>
+              </div>
             </div>
           </div>
         </main>
