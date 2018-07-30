@@ -91,6 +91,7 @@ contract WeightWagers is usingOraclize{
       delete wagersBeingVerified[myid];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
         wagerToVerify.wagerer.send(wagerToVerify.wagerAmount * rewardMultiplier / 1000);
+        delete wagers[wagerToVerify.wagerer][myVerifyingWager.wagerIndex];
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
       } else {
         emit WagerUnchanged(myid);
@@ -106,6 +107,8 @@ contract WeightWagers is usingOraclize{
 
   function verifyWager(uint _wagerIndex) public {
     Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
+    //DJSFIXME We might need to add "wagerToVerify.expiration != '0'" to this if
+    //DJSFIXME statement to avoid verifying "deleted" wagers
     if (wagerToVerify.expiration < now) {
       delete wagers[msg.sender][_wagerIndex];
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
@@ -116,6 +119,12 @@ contract WeightWagers is usingOraclize{
       bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
       emit WagerBeingVerified(msg.sender, _wagerIndex);
+    }
+  }
+
+  function verifyWagers() public {
+    for (uint ii = 0; ii < wagers[msg.sender].length; ii++) {
+      verifyWager(ii);
     }
   }
 

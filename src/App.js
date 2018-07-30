@@ -79,6 +79,8 @@ class App extends Component {
         if (organizedWagers.length === 0) {
           wagers = null;
         } else {
+          //DJSFIXME I think we need to underscore filter in order to not show
+          //"deleted" wagers
           wagers = organizedWagers.map((wager) => {
             return [
               (new Date(wager[0].toNumber() * 1000)).toUTCString(),
@@ -92,6 +94,8 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
+        //DJSFIXME Also do a verify call.
+
         //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
 
         // Stores a given value, 5 by default.
@@ -116,6 +120,7 @@ class App extends Component {
     const scaleID = this.scaleID;
     const amountToWager = this.amountToWager;
     this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager});
+    //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
   }
 
   handleInputChange(inputName, e) {
