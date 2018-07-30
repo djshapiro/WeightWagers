@@ -95,6 +95,9 @@ class App extends Component {
           account: accounts[0],
         });
         //DJSFIXME Also do a verify call.
+        return weightWagersInstance.verifyWagers({from: accounts[0]});
+      }).then((result, err) => {
+        console.log(result);
 
         //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
 
@@ -162,7 +165,7 @@ class App extends Component {
                       {this.state.wagers.map( (wager) => {
                         if (wager[0] !== 0) {
                           return (
-                            <tr>
+                            <tr key={wager.expiration}>
                               <td>{wager[0]}</td>
                               <td>{wager[1]}</td>
                               <td>{wager[2]}</td>
@@ -176,19 +179,19 @@ class App extends Component {
               }
               <h1>Create a new wager</h1>
               <div className="inputDiv">
-                <label for="expiration">Expiration (in seconds)</label>
-                <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autofocus type="number" className="wagerInput"/>
+                <label htmlFor="expiration">Expiration (in seconds)</label>
+                <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autoFocus type="number" className="wagerInput"/>
               </div>
               <div className="inputDiv">
-                <label for="desiredWeightChange">Desired Weight Change (in lbs)</label>
+                <label htmlFor="desiredWeightChange">Desired Weight Change (in lbs)</label>
                 <input name="desiredWeightChange" id="desiredWeightChange" onChange={this.handleInputChange.bind(this, "desiredWeightChange")} type="number" className="wagerInput"/>
               </div>
               <div className="inputDiv">
-                <label for="scaleID">Smart Scale ID</label>
+                <label htmlFor="scaleID">Smart Scale ID</label>
                 <input name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput"/>
               </div>
               <div className="inputDiv">
-                <label for="amountToWager">Amount to wager (in wei)</label>
+                <label htmlFor="amountToWager">Amount to wager (in wei)</label>
                 <input name="amountToWager" id="amountToWager" onChange={this.handleInputChange.bind(this, "amountToWager")} type="number" className="wagerInput"/>
               </div>
               <div className="submitButtonDiv">
