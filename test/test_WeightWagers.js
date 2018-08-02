@@ -193,7 +193,7 @@ contract('WeightWagers', accounts => {
     log = response.logs[0];
     assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');
 
-    logScaleWatcher = logWatchPromise(weightWagers.WagerActivated({ fromBlock: 'latest'} ));
+    logScaleWatcher = logWatchPromise(weightWagers.WagerActivated({ fromBlock: 'latest' } ));
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 

@@ -81,12 +81,15 @@ class App extends Component {
         } else {
           //DJSFIXME I think we need to underscore filter in order to not show
           //"deleted" wagers
-          wagers = organizedWagers.map((wager) => {
+          const unfilteredWagers = organizedWagers.map((wager) => {
             return [
               (new Date(wager[0].toNumber() * 1000)).toUTCString(),
               wager[1].toNumber(),
               wager[2].toNumber(),
             ];
+          });
+          wagers = _.filter(unfilteredWagers, (wager) => {
+            return wager[1] != 0;
           });
         }
         _this.setState({
@@ -94,7 +97,6 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
-        //DJSFIXME Also do a verify call.
         return weightWagersInstance.verifyWagers({from: accounts[0]});
       }).then((result, err) => {
         console.log(result);
@@ -142,7 +144,7 @@ class App extends Component {
             <div className="pure-u-1-1">
               <img src={WeightWagersPng} className="logoImage">
               </img>
-              {this.state.wagers && 
+              {this.state.wagers && this.state.wagers.length > 0 && 
                 <div>
                   <h2>Your wagers</h2>
                   <table>
@@ -153,15 +155,6 @@ class App extends Component {
                         <th> wager amount </th>
                         <th> start weight </th>
                       </tr>
-                      {/*this.state.wagers.map( (wager) => {
-                        return (
-                          <tr>
-                            <td>{(new Date(wager[0].toNumber() * 1000)).toUTCString()}</td>
-                            <td>{wager[1].toNumber()}</td>
-                            <td>{wager[2].toNumber()}</td>
-                          </tr>
-                        );
-                      })*/}
                       {this.state.wagers.map( (wager) => {
                         if (wager[0] !== 0) {
                           return (
@@ -175,6 +168,11 @@ class App extends Component {
                       }
                     </tbody>
                   </table>
+                </div>
+              }
+              {!this.state.wagers || this.state.wagers.length === 0 &&
+                <div>
+                  <h2>You have no active wagers</h2>
                 </div>
               }
               <h1>Create a new wager</h1>
