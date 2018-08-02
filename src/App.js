@@ -67,12 +67,63 @@ class App extends Component {
           console.log(JSON.stringify(value, null, 2));
         });*/
         const createWagerEvent = weightWagersInstance.WagerCreated();
+        const activateWagerEvent = weightWagersInstance.WagerActivated();
+        const beingVerifiedEvent = weightWagersInstance.WagerBeingVerified();
+        const verifiedWagerEvent = weightWagersInstance.WagerVerified();
+        const expiredWagerEvent = weightWagersInstance.WagerExpired();
+        const unchangedWagerEvent = weightWagersInstance.WagerUnchanged();
+
         createWagerEvent.watch(function(error, result){
+          console.log('WagerCreated was emitted');
           console.log({error, result});
           if(!error) {
             console.log(result);
           }
         });
+
+        activateWagerEvent.watch(function(error, result){
+          console.log('WagerActivated was emitted');
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
+
+        beingVerifiedEvent.watch(function(error, result){
+          console.log('WagerBeingVerified was emitted');
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
+
+        verifiedWagerEvent.watch(function(error, result){
+          console.log('WagerVerified was emitted');
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
+
+        expiredWagerEvent.watch(function(error, result){
+          console.log('WagerExpired was emitted');
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
+
+        unchangedWagerEvent.watch(function(error, result){
+          console.log('WagerUnchanged was emitted');
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
+
+
+
+
         return weightWagersInstance.getWagers({from: accounts[0]});
       }).then((result, err) => {
         //Returning an array of arrays in the best way
@@ -99,7 +150,6 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
-        console.log(accounts);
       //  return weightWagersInstance.verifyWagers({from: accounts[0]});
       //}).then((result, err) => {
       //  console.log(result);
@@ -182,7 +232,7 @@ class App extends Component {
                   </div>
                 </div>
               }
-              {!this.state.wagers || this.state.wagers.length === 0 &&
+              {(!this.state.wagers || this.state.wagers.length === 0) &&
                 <div>
                   <h2>You have no active wagers</h2>
                 </div>

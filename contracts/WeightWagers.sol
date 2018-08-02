@@ -35,23 +35,22 @@ contract WeightWagers is usingOraclize{
   // that we can officially verify the wager 
   mapping(bytes32 => VerifyingWager) private wagersBeingVerified;
 
-  // event for when a user attempts to create a wager
+  // for when a user attempts to create a wager
   event WagerCreated(uint expiration, uint desiredWeightChange, uint wagerAmount, string smartScaleID);
-  // event for when the oraclized smart scale returns
+  // for when the oraclized smart scale returns
   // data for a wager that a user is trying to create
   event WagerActivated(address wagerer, uint wagerAmount);
-  // event for when a user attempts to verify a wager
+  // for when a user attempts to verify a wager
   event WagerBeingVerified(address verifierAddress, uint wagerIndex);
-  // event for when a wager is verified
+  // for when a wager is verified
   event WagerVerified(address wagerer, uint wagerAmount);
-  //event WagerVerified(uint result, uint startWeight, uint desiredWeightChange);
-  // event for when a wager is expired - called after a user
+  // for when a wager is expired - called after a user
   // attempts to verify a wager and the contract discovers
   // that the wager has expired
   event WagerExpired(address wagerer, uint wagerAmount);
-  // event for when the __callback recieves an invalid wager id
+  // for when the __callback recieves an invalid wager id
   event InvalidWager(bytes32 myid);
-  // event for when the verify callback recieves a valid
+  // for when the verify callback recieves a valid
   // wager but one where the user hasn't actually achieved
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
