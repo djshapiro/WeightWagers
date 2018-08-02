@@ -63,12 +63,16 @@ class App extends Component {
       weightWagers.deployed().then((instance) => {
         weightWagersInstance = instance
 
-        /*weightWagersInstance.GettingWagers((err, value) => {
-          console.log(JSON.stringify(value, null, 2));
-        });
-        weightWagersInstance.WagerCreated((err, value) => {
+        /*weightWagersInstance.WagerCreated((err, value) => {
           console.log(JSON.stringify(value, null, 2));
         });*/
+        const createWagerEvent = weightWagersInstance.WagerCreated();
+        createWagerEvent.watch(function(error, result){
+          console.log({error, result});
+          if(!error) {
+            console.log(result);
+          }
+        });
         return weightWagersInstance.getWagers({from: accounts[0]});
       }).then((result, err) => {
         //Returning an array of arrays in the best way
@@ -79,8 +83,6 @@ class App extends Component {
         if (organizedWagers.length === 0) {
           wagers = null;
         } else {
-          //DJSFIXME I think we need to underscore filter in order to not show
-          //"deleted" wagers
           const unfilteredWagers = organizedWagers.map((wager) => {
             return [
               (new Date(wager[0].toNumber() * 1000)).toUTCString(),
@@ -97,9 +99,10 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
-        return weightWagersInstance.verifyWagers({from: accounts[0]});
-      }).then((result, err) => {
-        console.log(result);
+        console.log(accounts);
+      //  return weightWagersInstance.verifyWagers({from: accounts[0]});
+      //}).then((result, err) => {
+      //  console.log(result);
 
         //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
 
@@ -128,6 +131,10 @@ class App extends Component {
     //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
   }
 
+  onVerifyWagersClick() {
+      this.state.weightWagersInstance.verifyWagers({from: this.state.account});
+  }
+
   handleInputChange(inputName, e) {
     this[inputName] = e.target.value;
   }
@@ -146,28 +153,33 @@ class App extends Component {
               </img>
               {this.state.wagers && this.state.wagers.length > 0 && 
                 <div>
-                  <h2>Your wagers</h2>
-                  <table>
-                    <tbody>
-                      <tr>
-                        <th> expiration </th>
-                        <th> desired weight change </th>
-                        <th> wager amount </th>
-                        <th> start weight </th>
-                      </tr>
-                      {this.state.wagers.map( (wager) => {
-                        if (wager[0] !== 0) {
-                          return (
-                            <tr key={wager.expiration}>
-                              <td>{wager[0]}</td>
-                              <td>{wager[1]}</td>
-                              <td>{wager[2]}</td>
-                            </tr>
-                          );
-                        }})
-                      }
-                    </tbody>
-                  </table>
+                  <div>
+                    <h2>Your wagers</h2>
+                    <table>
+                      <tbody>
+                        <tr>
+                          <th> expiration </th>
+                          <th> desired weight change </th>
+                          <th> wager amount </th>
+                          <th> start weight </th>
+                        </tr>
+                        {this.state.wagers.map( (wager) => {
+                          if (wager[0] !== 0) {
+                            return (
+                              <tr key={wager.expiration}>
+                                <td>{wager[0]}</td>
+                                <td>{wager[1]}</td>
+                                <td>{wager[2]}</td>
+                              </tr>
+                            );
+                          }})
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="submitButtonDiv">
+                    <button type="submit" onClick={this.onVerifyWagersClick.bind(this)} className="submitButton">Verify Wagers</button>
+                  </div>
                 </div>
               }
               {!this.state.wagers || this.state.wagers.length === 0 &&
