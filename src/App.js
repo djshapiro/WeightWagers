@@ -248,7 +248,10 @@ class App extends Component {
               </div>
               <div className="inputDiv">
                 <label htmlFor="scaleID">Smart Scale ID</label>
-                <input name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput"/>
+                <select name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput">
+                  <option value="losesAllWeightImmediately">Do NOT lose the weight</option>
+                  <option value="always200Pounds">Do lose the weight</option>
+                </select>
               </div>
               <div className="inputDiv">
                 <label htmlFor="amountToWager">Amount to wager (in wei)</label>
