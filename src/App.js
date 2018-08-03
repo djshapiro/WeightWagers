@@ -3,6 +3,7 @@ import WeightWagers from '../build/contracts/WeightWagers.json'
 import getWeb3 from './utils/getWeb3'
 import WeightWagersPng from './assets/WeightWagers.png'
 import _ from 'underscore';
+import NotificationSystem from 'react-notification-system';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -40,6 +41,10 @@ class App extends Component {
     .catch(() => {
       console.log('Error finding web3.')
     })
+  }
+
+  componentDidMount() {
+    this._notificationSystem = this.refs.notificationSystem;
   }
 
   instantiateContract() {
@@ -142,7 +147,7 @@ class App extends Component {
             ];
           });
           wagers = _.filter(unfilteredWagers, (wager) => {
-            return wager[1] != 0;
+            return wager[1] !== 0;
           });
         }
         _this.setState({
@@ -177,8 +182,13 @@ class App extends Component {
     const desiredWeightChange = this.desiredWeightChange;
     const scaleID = this.scaleID;
     const amountToWager = this.amountToWager;
-    this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager});
+    this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager}).then( () => {
+      this._notificationSystem.addNotification({
+        message: 'Oraclizing your smart scale data...',
+        level: 'success'
+      });
     //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
+    });
   }
 
   onVerifyWagersClick() {
@@ -263,6 +273,7 @@ class App extends Component {
             </div>
           </div>
         </main>
+        <NotificationSystem ref="notificationSystem" />
       </div>
     );
   }
