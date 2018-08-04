@@ -47,6 +47,26 @@ class App extends Component {
     this._notificationSystem = this.refs.notificationSystem;
   }
 
+  transformWagers(result) {
+    let wagers;
+    const organizedWagers = _.zip(result[0], result[1], result[2]);
+    if (organizedWagers.length === 0) {
+      wagers = null;
+    } else {
+      const unfilteredWagers = organizedWagers.map((wager) => {
+        return [
+          (new Date(wager[0].toNumber() * 1000)).toUTCString(),
+          wager[1].toNumber(),
+          wager[2].toNumber(),
+        ];
+      });
+      wagers = _.filter(unfilteredWagers, (wager) => {
+        return wager[1] !== 0;
+      });
+    }
+    return wagers;
+  }
+
   instantiateContract() {
     /*
      * SMART CONTRACT EXAMPLE
@@ -78,7 +98,7 @@ class App extends Component {
         const expiredWagerEvent = weightWagersInstance.WagerExpired();
         const unchangedWagerEvent = weightWagersInstance.WagerUnchanged();
 
-        createWagerEvent.watch(function(error, result){
+        /*createWagerEvent.watch(function(error, result){
           console.log('WagerCreated was emitted');
           console.log({error, result});
           if(!error) {
@@ -124,7 +144,7 @@ class App extends Component {
           if(!error) {
             console.log(result);
           }
-        });
+        });*/
 
 
 
@@ -134,22 +154,7 @@ class App extends Component {
         //Returning an array of arrays in the best way
         //Solidity can return all the user's wagers, so
         //lets transform the data into a useful format
-        let wagers;
-        const organizedWagers = _.zip(result[0], result[1], result[2]);
-        if (organizedWagers.length === 0) {
-          wagers = null;
-        } else {
-          const unfilteredWagers = organizedWagers.map((wager) => {
-            return [
-              (new Date(wager[0].toNumber() * 1000)).toUTCString(),
-              wager[1].toNumber(),
-              wager[2].toNumber(),
-            ];
-          });
-          wagers = _.filter(unfilteredWagers, (wager) => {
-            return wager[1] !== 0;
-          });
-        }
+        const wagers = this.transformWagers(result);
         _this.setState({
           wagers: wagers,
           weightWagersInstance: weightWagersInstance,
@@ -178,14 +183,38 @@ class App extends Component {
   }
 
   onFormSubmit(a, b, c) {
-    const expiration = this.expiration;
-    const desiredWeightChange = this.desiredWeightChange;
-    const scaleID = this.scaleID;
-    const amountToWager = this.amountToWager;
-    this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager}).then( () => {
-      this._notificationSystem.addNotification({
-        message: 'Oraclizing your smart scale data...',
-        level: 'success'
+    const expiration = this.expiration || 0;
+    const desiredWeightChange = this.desiredWeightChange || 0;
+    const scaleID = this.scaleID || "losesAllWeightImmediately";
+    const amountToWager = this.amountToWager || 0;
+
+    //Notify the user that creation has begun
+    this._notificationSystem.addNotification({
+      message: 'Oraclizing your smart scale data...',
+      level: 'success',
+      uid: 'creating-wager',
+      autoDismiss: 0,
+    });
+
+    var _this = this;
+
+    //Create the wager
+    this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager}).then( (result, err) => {
+
+      //Listen to the activate wager event
+      const activateWagerEvent = _this.state.weightWagersInstance.WagerActivated();
+      activateWagerEvent.watch(function(error, result){
+        
+        //Wager was activated, so now let's get the wagers again
+        _this.state.weightWagersInstance.getWagers({from: _this.state.account}).then( (result, err) => {
+          const wagers = _this.transformWagers(result);
+          _this.setState({
+            wagers: wagers,
+          });
+          _this._notificationSystem.removeNotification({
+            uid: 'creating-wager',
+          });
+        });
       });
     //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
     });
