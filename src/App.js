@@ -43,9 +43,9 @@ class App extends Component {
     })
   }
 
-  componentDidMount() {
+  /*componentDidMount() {
     this._notificationSystem = this.refs.notificationSystem;
-  }
+  }*/
 
   transformWagers(result) {
     let wagers;
@@ -160,6 +160,7 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
+        this._notificationSystem = this.refs.notificationSystem;
       //  return weightWagersInstance.verifyWagers({from: accounts[0]});
       //}).then((result, err) => {
       //  console.log(result);
@@ -266,17 +267,19 @@ class App extends Component {
   }
 
   render() {
-    if (!this.state.account) {
+    /*if (!this.state.account) {
       return (
         <div>
+          <NotificationSystem ref="notificationSystem" />
           <h1>
             Log in with metamask and refresh this page
           </h1>
         </div>
       );
-    }
+    }*/
     return (
       <div className="App">
+        <NotificationSystem ref="notificationSystem" />
         <nav className="navbar pure-menu pure-menu-horizontal">
             <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
         </nav>
@@ -322,33 +325,43 @@ class App extends Component {
                   <h2>You have no active wagers</h2>
                 </div>
               }
-              <h1>Create a new wager</h1>
-              <div className="inputDiv">
-                <label htmlFor="expiration">Expiration (in seconds)</label>
-                <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autoFocus type="number" className="wagerInput"/>
-              </div>
-              <div className="inputDiv">
-                <label htmlFor="desiredWeightChange">Desired Weight Change (in lbs)</label>
-                <input name="desiredWeightChange" id="desiredWeightChange" onChange={this.handleInputChange.bind(this, "desiredWeightChange")} type="number" className="wagerInput"/>
-              </div>
-              <div className="inputDiv">
-                <label htmlFor="scaleID">Smart Scale ID</label>
-                <select name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput">
-                  <option value="losesAllWeightImmediately">Do lose the weight</option>
-                  <option value="always200Pounds">Do NOT lose the weight</option>
-                </select>
-              </div>
-              <div className="inputDiv">
-                <label htmlFor="amountToWager">Amount to wager (in wei)</label>
-                <input name="amountToWager" id="amountToWager" onChange={this.handleInputChange.bind(this, "amountToWager")} type="number" className="wagerInput"/>
-              </div>
-              <div className="submitButtonDiv">
-                <button type="submit" onClick={this.onFormSubmit.bind(this)} className="submitButton">Create Wager</button>
-              </div>
+              {!this.state.account &&
+                <div>
+                  <h1>
+                    Log in with metamask and refresh this page
+                  </h1>
+                </div>
+              }
+              {this.state.account && 
+                <div>
+                  <h1>Create a new wager</h1>
+                  <div className="inputDiv">
+                    <label htmlFor="expiration">Expiration (in seconds)</label>
+                    <input name="expiration" id="expiration" onChange={this.handleInputChange.bind(this, "expiration")} autoFocus type="number" className="wagerInput"/>
+                  </div>
+                  <div className="inputDiv">
+                    <label htmlFor="desiredWeightChange">Desired Weight Change (in lbs)</label>
+                    <input name="desiredWeightChange" id="desiredWeightChange" onChange={this.handleInputChange.bind(this, "desiredWeightChange")} type="number" className="wagerInput"/>
+                  </div>
+                  <div className="inputDiv">
+                    <label htmlFor="scaleID">Smart Scale ID</label>
+                    <select name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput">
+                      <option value="losesAllWeightImmediately">Do lose the weight</option>
+                      <option value="always200Pounds">Do NOT lose the weight</option>
+                    </select>
+                  </div>
+                  <div className="inputDiv">
+                    <label htmlFor="amountToWager">Amount to wager (in wei)</label>
+                    <input name="amountToWager" id="amountToWager" onChange={this.handleInputChange.bind(this, "amountToWager")} type="number" className="wagerInput"/>
+                  </div>
+                  <div className="submitButtonDiv">
+                    <button type="submit" onClick={this.onFormSubmit.bind(this)} className="submitButton">Create Wager</button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </main>
-        <NotificationSystem ref="notificationSystem" />
       </div>
     );
   }
