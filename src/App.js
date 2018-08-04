@@ -190,7 +190,7 @@ class App extends Component {
 
     //Notify the user that creation has begun
     this._notificationSystem.addNotification({
-      message: 'Oraclizing your smart scale data...',
+      message: 'Creating your wager...',
       level: 'success',
       uid: 'creating-wager',
       autoDismiss: 0,
@@ -221,7 +221,44 @@ class App extends Component {
   }
 
   onVerifyWagersClick() {
-      this.state.weightWagersInstance.verifyWagers({from: this.state.account});
+    this._notificationSystem.addNotification({
+      message: 'Verifying your wagers...',
+      level: 'success',
+      uid: 'verifying-wagers',
+      autoDismiss: 0,
+    });
+
+    var _this = this;
+    this.state.weightWagersInstance.verifyWagers({from: this.state.account}).then( (result, err) => {
+      const verifiedWagerEvent = _this.state.weightWagersInstance.WagerVerified();
+      const expiredWagerEvent = _this.state.weightWagersInstance.WagerExpired();
+      const unchangedWagerEvent = _this.state.weightWagersInstance.WagerUnchanged();
+
+      const onEventCallback = () => {
+        _this.state.weightWagersInstance.getWagers({from: _this.state.account}).then( (result, err) => {
+          const wagers = _this.transformWagers(result);
+          _this.setState({
+            wagers: wagers,
+          });
+          _this._notificationSystem.removeNotification({
+            uid: 'verifying-wagers',
+          });
+        });
+      };
+
+      verifiedWagerEvent.watch(function(error, result){
+        onEventCallback();
+      });
+
+      expiredWagerEvent.watch(function(error, result){
+        onEventCallback();
+      });
+
+      unchangedWagerEvent.watch(function(error, result){
+        onEventCallback();
+      });
+
+    });
   }
 
   handleInputChange(inputName, e) {
@@ -229,6 +266,15 @@ class App extends Component {
   }
 
   render() {
+    if (!this.state.account) {
+      return (
+        <div>
+          <h1>
+            Log in with metamask and refresh this page
+          </h1>
+        </div>
+      );
+    }
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
@@ -288,8 +334,8 @@ class App extends Component {
               <div className="inputDiv">
                 <label htmlFor="scaleID">Smart Scale ID</label>
                 <select name="scaleID" id="scaleID" onChange={this.handleInputChange.bind(this, "scaleID")} className="wagerInput">
-                  <option value="losesAllWeightImmediately">Do NOT lose the weight</option>
-                  <option value="always200Pounds">Do lose the weight</option>
+                  <option value="losesAllWeightImmediately">Do lose the weight</option>
+                  <option value="always200Pounds">Do NOT lose the weight</option>
                 </select>
               </div>
               <div className="inputDiv">
