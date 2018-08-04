@@ -267,16 +267,6 @@ class App extends Component {
   }
 
   render() {
-    /*if (!this.state.account) {
-      return (
-        <div>
-          <NotificationSystem ref="notificationSystem" />
-          <h1>
-            Log in with metamask and refresh this page
-          </h1>
-        </div>
-      );
-    }*/
     return (
       <div className="App">
         <NotificationSystem ref="notificationSystem" />
@@ -287,12 +277,11 @@ class App extends Component {
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <img src={WeightWagersPng} className="logoImage">
-              </img>
+              <img src={WeightWagersPng} className="logoImage"/>
               {this.state.wagers && this.state.wagers.length > 0 && 
                 <div>
                   <div>
-                    <h2>Your wagers</h2>
+                    <h1>Your wagers</h1>
                     <table>
                       <tbody>
                         <tr>
@@ -322,7 +311,7 @@ class App extends Component {
               }
               {(!this.state.wagers || this.state.wagers.length === 0) &&
                 <div>
-                  <h2>You have no active wagers</h2>
+                  <h1>You have no active wagers</h1>
                 </div>
               }
               {!this.state.account &&
