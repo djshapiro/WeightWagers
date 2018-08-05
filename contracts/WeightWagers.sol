@@ -123,7 +123,9 @@ contract WeightWagers is usingOraclize{
 
   function verifyWagers() public {
     for (uint ii = 0; ii < wagers[msg.sender].length; ii++) {
-      verifyWager(ii);
+      if (wagers[msg.sender][ii].expiration != 0) {
+        verifyWager(ii);
+      }
     }
   }
 
