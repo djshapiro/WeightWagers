@@ -48,8 +48,6 @@ contract WeightWagers is usingOraclize{
   // attempts to verify a wager and the contract discovers
   // that the wager has expired
   event WagerExpired(address wagerer, uint wagerAmount);
-  // for when the __callback recieves an invalid wager id
-  event InvalidWager(bytes32 myid);
   // for when the verify callback recieves a valid
   // wager but one where the user hasn't actually achieved
   // their goal weight yet
@@ -99,9 +97,6 @@ contract WeightWagers is usingOraclize{
         //         slowly bloat into tons of data that no one needs
       }
     }
-    //DJSFIXME else (if myid is nowhere)
-    //DJSFIXME then emit InvalidWager(myid);
-    //DJSFIXME then do nothing?
   }
 
   function verifyWager(uint _wagerIndex) public {
