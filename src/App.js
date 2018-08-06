@@ -230,7 +230,7 @@ class App extends Component {
     });
 
     var _this = this;
-    this.state.weightWagersInstance.verifyWagers({from: this.state.account}).then( (result, err) => {
+    this.state.weightWagersInstance.verifyWagers({from: this.state.account, gas: '5000000'}).then( (result, err) => {
       const verifiedWagerEvent = _this.state.weightWagersInstance.WagerVerified();
       const expiredWagerEvent = _this.state.weightWagersInstance.WagerExpired();
       const unchangedWagerEvent = _this.state.weightWagersInstance.WagerUnchanged();
