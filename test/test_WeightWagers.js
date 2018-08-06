@@ -55,7 +55,7 @@ contract('WeightWagers', accounts => {
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   
-  it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
+  /*it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Chubbs creates a wager.
@@ -174,7 +174,7 @@ contract('WeightWagers', accounts => {
     const alWagers = await weightWagers.getWagers({from: al_roker});
     assert.equal(alWagers[1][0], 0, 'Al does not have the correct target weight');
     assert.equal(alWagers[2][0], 0, 'Al does not have the correct amount');
-  });
+  });*/
 
   it("verifyWagers verifies both of an address' active wagers", async () => {
     const weightWagers = await WeightWagers.deployed();
@@ -203,7 +203,8 @@ contract('WeightWagers', accounts => {
     assert.equal(billyWagers[2][1], 45678, 'Billy\'s second wager does not have the correct amount');
 
     //Now let's try verifying both wagers
-    weightWagers.verifyWagers({from: billy_halleck});
+    const verifyWagersResponse2 = await weightWagers.verifyWagers({from: billy_halleck});
+    console.log(verifyWagersResponse2.logs);
 
     logScaleWatcher = logWatchPromiseTwice(weightWagers.WagerVerified({ fromBlock: 'latest'} ));
     log = await logScaleWatcher;
@@ -213,6 +214,11 @@ contract('WeightWagers', accounts => {
     billyWagers = await weightWagers.getWagers({from: billy_halleck});
     assert.equal(billyWagers[2][0], 0, 'Billy\' first wager does not have the correct amount');
     assert.equal(billyWagers[2][1], 0, 'Billy\'s second wager does not have the correct amount');
+
+    //Try verifying again to make sure that verified wagers don't go through the verification process again
+    const verifyWagersResponse = await weightWagers.verifyWagers({from: billy_halleck});
+    assert.equal(verifyWagersResponse.logs.length, 0, 'Billy\'s verifyWagers call emitted some events even though nothing should have been verified');
+
   });
 
 });
