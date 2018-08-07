@@ -124,12 +124,11 @@ contract WeightWagers is usingOraclize{
     }
   }
 
-  function getWagers() public view returns (uint[] memory expirations, uint[] memory desiredWeightChanges, uint[] memory values, uint[] memory weights, bytes32[] memory IDs) {
+  function getWagers() public view returns (uint[] memory expirations, uint[] memory desiredWeightChanges, uint[] memory values, uint[] memory weights) {
     expirations = new uint[](wagers[msg.sender].length);
     desiredWeightChanges = new uint[](wagers[msg.sender].length);
     values = new uint[](wagers[msg.sender].length);
     weights = new uint[](wagers[msg.sender].length);
-    IDs = new string[](wagers[msg.sender].length);
 
     for (uint ii = 0; ii < wagers[msg.sender].length; ii++) {
         Wager memory wager = wagers[msg.sender][ii];
@@ -137,10 +136,9 @@ contract WeightWagers is usingOraclize{
         desiredWeightChanges[ii] = wager.desiredWeightChange;
         values[ii] = wager.wagerAmount;
         weights[ii] = wager.startWeight;
-        IDs[ii] = wager.smartScaleID;
     }
 
-    return (expirations, desiredWeightChanges, values, weights, IDs);
+    return (expirations, desiredWeightChanges, values, weights);
   }
 
 }
