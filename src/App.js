@@ -43,13 +43,13 @@ class App extends Component {
     })
   }
 
-  /*componentDidMount() {
+  componentDidMount() {
     this._notificationSystem = this.refs.notificationSystem;
-  }*/
+  }
 
   transformWagers(result) {
     let wagers;
-    const organizedWagers = _.zip(result[0], result[1], result[2]);
+    const organizedWagers = _.zip(result[0], result[1], result[2], result[3]);
     if (organizedWagers.length === 0) {
       wagers = null;
     } else {
@@ -58,6 +58,7 @@ class App extends Component {
           (new Date(wager[0].toNumber() * 1000)).toUTCString(),
           wager[1].toNumber(),
           wager[2].toNumber(),
+          wager[3].toNumber(),
         ];
       });
       wagers = _.filter(unfilteredWagers, (wager) => {
@@ -160,7 +161,6 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
-        this._notificationSystem = this.refs.notificationSystem;
       //  return weightWagersInstance.verifyWagers({from: accounts[0]});
       //}).then((result, err) => {
       //  console.log(result);
@@ -192,15 +192,19 @@ class App extends Component {
     //Notify the user that creation has begun
     this._notificationSystem.addNotification({
       message: 'Creating your wager...',
-      level: 'success',
+      level: 'info',
       uid: 'creating-wager',
-      autoDismiss: 0,
+      autoDismiss: 30,
     });
 
     var _this = this;
 
     //Create the wager
     this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager}).then( (result, err) => {
+  
+      this._notificationSystem.editNotification('creating-wager', {
+        message: 'Wager created. Waiting for oraclized smart scale data to activate your wager...',
+      });
 
       //Listen to the activate wager event
       const activateWagerEvent = _this.state.weightWagersInstance.WagerActivated();
@@ -212,8 +216,10 @@ class App extends Component {
           _this.setState({
             wagers: wagers,
           });
-          _this._notificationSystem.removeNotification({
-            uid: 'creating-wager',
+          _this._notificationSystem.editNotification('creating-wager', {
+            message: 'Your wager has been created!',
+            level: 'success',
+            autoDismiss: 3,
           });
         });
       });
@@ -224,39 +230,51 @@ class App extends Component {
   onVerifyWagersClick() {
     this._notificationSystem.addNotification({
       message: 'Verifying your wagers...',
-      level: 'success',
+      level: 'info',
       uid: 'verifying-wagers',
-      autoDismiss: 0,
+      autoDismiss: 20,
     });
 
     var _this = this;
     this.state.weightWagersInstance.verifyWagers({from: this.state.account, gas: '5000000'}).then( (result, err) => {
+
+      this._notificationSystem.editNotification('verifying-wagers', {
+        message: 'Verification has begun. Waiting for oraclized smart scale data...',
+      });
+
       const verifiedWagerEvent = _this.state.weightWagersInstance.WagerVerified();
       const expiredWagerEvent = _this.state.weightWagersInstance.WagerExpired();
       const unchangedWagerEvent = _this.state.weightWagersInstance.WagerUnchanged();
 
-      const onEventCallback = () => {
+      let ii = 0;
+      const onEventCallback = (message, level) => {
+        ii = ii + 1;
+        this._notificationSystem.addNotification({
+          message: message,
+          level: level,
+          uid: `verified{ii}`,
+          autoDismiss: 5,
+        });
         _this.state.weightWagersInstance.getWagers({from: _this.state.account}).then( (result, err) => {
           const wagers = _this.transformWagers(result);
           _this.setState({
             wagers: wagers,
           });
-          _this._notificationSystem.removeNotification({
-            uid: 'verifying-wagers',
-          });
         });
       };
 
       verifiedWagerEvent.watch(function(error, result){
-        onEventCallback();
+        const amount = result.args.wagerAmount.toNumber();
+        onEventCallback(`You won a wager! You have been awarded ${amount} plus a reward.`, 'success');
       });
 
       expiredWagerEvent.watch(function(error, result){
-        onEventCallback();
+        const amount = result.args.wagerAmount.toNumber();
+        onEventCallback(`You lost a wager! Say goodbye to ${amount}.`, 'error');
       });
 
       unchangedWagerEvent.watch(function(error, result){
-        onEventCallback();
+        onEventCallback('You have yet to complete an unexpired wager');
       });
 
     });
@@ -297,6 +315,7 @@ class App extends Component {
                                 <td>{wager[0]}</td>
                                 <td>{wager[1]}</td>
                                 <td>{wager[2]}</td>
+                                <td>{wager[3]}</td>
                               </tr>
                             );
                           }})
