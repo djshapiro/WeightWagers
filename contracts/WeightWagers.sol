@@ -79,9 +79,6 @@ contract WeightWagers is usingOraclize{
       wagers[newWager.wagerer].push(newWager);
       delete wagersBeingActivated[myid];
       emit WagerActivated(newWager.wagerer, newWager.wagerAmount);
-      //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingActivated
-      //         on function exit no matter what, so that wagersBeingActivated doesn't
-      //         slowly bloat into tons of data that no one needs
     } else if (wagersBeingVerified[myid].wagerer != address(0)) {
       VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
@@ -92,23 +89,16 @@ contract WeightWagers is usingOraclize{
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
       } else {
         emit WagerUnchanged(myid);
-        //DJSFIXME Maybe include a modifier to delete the wager from wagersBeingVerified
-        //         on function exit no matter what, so that wagersBeingVerified doesn't
-        //         slowly bloat into tons of data that no one needs
       }
     }
   }
 
   function verifyWager(uint _wagerIndex) public {
     Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
-    //DJSFIXME We might need to add "wagerToVerify.expiration != '0'" to this if
-    //DJSFIXME statement to avoid verifying "deleted" wagers
     if (wagerToVerify.expiration < now) {
       delete wagers[msg.sender][_wagerIndex];
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
     } else {
-      //DJSFIXME This is an artifact of when I was doing the time diff thing. Delete if you decide to not do time diffs.
-      //string memory timeDiff = uint2str(now - wagerToVerify.expiration);
       string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", wagerToVerify.smartScaleID, "/1).value");
       bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);

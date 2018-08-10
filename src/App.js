@@ -23,6 +23,7 @@ class App extends Component {
 
     this.instantiateContract = this.instantiateContract.bind(this);
     this.contractEvent = this.contractEvent.bind(this);
+    this.lastIndex = 0;
   }
 
   componentWillMount() {
@@ -188,12 +189,14 @@ class App extends Component {
     const desiredWeightChange = this.desiredWeightChange || 0;
     const scaleID = this.scaleID || "losesAllWeightImmediately";
     const amountToWager = this.amountToWager || 0;
+    const notificationID = `creating-wager${this.lastIndex}`;
+    this.lastIndex = this.lastIndex + 1
 
     //Notify the user that creation has begun
     this._notificationSystem.addNotification({
       message: 'Creating your wager...',
       level: 'info',
-      uid: 'creating-wager',
+      uid: notificationID,
       autoDismiss: 30,
     });
 
@@ -202,7 +205,7 @@ class App extends Component {
     //Create the wager
     this.state.weightWagersInstance.createWager(expiration, desiredWeightChange, scaleID, {from: this.state.account, value: amountToWager}).then( (result, err) => {
   
-      this._notificationSystem.editNotification('creating-wager', {
+      this._notificationSystem.editNotification(notificationID, {
         message: 'Wager created. Waiting for oraclized smart scale data to activate your wager...',
       });
 
@@ -216,7 +219,7 @@ class App extends Component {
           _this.setState({
             wagers: wagers,
           });
-          _this._notificationSystem.editNotification('creating-wager', {
+          _this._notificationSystem.editNotification(notificationID, {
             message: 'Your wager has been created!',
             level: 'success',
             autoDismiss: 3,
@@ -249,6 +252,7 @@ class App extends Component {
       let ii = 0;
       const onEventCallback = (message, level) => {
         ii = ii + 1;
+        this._notificationSystem.removeNotification('verifying-wagers');
         this._notificationSystem.addNotification({
           message: message,
           level: level,
@@ -312,10 +316,10 @@ class App extends Component {
                           if (wager[0] !== 0) {
                             return (
                               <tr key={wager.expiration}>
-                                <td>{wager[0]}</td>
-                                <td>{wager[1]}</td>
-                                <td>{wager[2]}</td>
-                                <td>{wager[3]}</td>
+                                <td key={0}>{wager[0]}</td>
+                                <td key={1}>{wager[1]}</td>
+                                <td key={2}>{wager[2]}</td>
+                                <td key={3}>{wager[3]}</td>
                               </tr>
                             );
                           }})
