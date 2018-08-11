@@ -300,6 +300,16 @@ class App extends Component {
           <div className="pure-g">
             <div className="pure-u-1-1">
               <img src={WeightWagersPng} className="logoImage"/>
+              {!this.state.account &&
+                <div>
+                  <h1>
+                    Account: You are not logged in
+                  </h1>
+                  <h1>
+                    Log in with metamask and refresh this page
+                  </h1>
+                </div>
+              }
               {this.state.wagers && this.state.wagers.length > 0 && 
                 <div>
                   <div>
@@ -337,15 +347,11 @@ class App extends Component {
                   <h1>You have no active wagers</h1>
                 </div>
               }
-              {!this.state.account &&
-                <div>
-                  <h1>
-                    Log in with metamask and refresh this page
-                  </h1>
-                </div>
-              }
               {this.state.account && 
                 <div>
+                  <h1>
+                    Account: {this.state.account}
+                  </h1>
                   <h1>Create a new wager</h1>
                   <div className="inputDiv">
                     <label htmlFor="expiration">Expiration (in seconds)</label>
