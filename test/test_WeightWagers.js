@@ -22,33 +22,6 @@ function logWatchPromiseTwice(_event) {
   return logWatchPromise(_event, 2);
 }
 
-/*//helper function for waiting for the creation and activation of wagers
-//DJSFIXME Try this at some point
-function createAndActivateWager(wagerContract, args, txDetails) {
-
-  //Wait for create
-  const createResponse = await wagerContract.createWager(args.exp, args.target, args.scaleID, txDetails);
-
-  //Wait for activate
-  const logScaleWatcher = logWatchPromise(wagerContract.WagerActivated({ fromBlock: 'latest'} ));
-  const activateResponse = await logScaleWatcher;
-
-  //Great!
-  return { createResponse, activateResponse };
-}
-
-function verifyWagerAndWaitForEvent(wagerContract, args, txDetails, eventToWaitFor) {
-  //Verify
-  const verifyResponse = await wagerContract.verifyWager(args.wagerIndex, txDetails);
-
-  //Promisify
-  const logScaleWatcher = logWatchPromise(wagerContract[eventToWaitFor]({ fromBlock: 'latest'} ));
-  const eventResponse = await logScaleWatcher;
-
-  //Bye!
-  return { verifyResponse, eventResponse };
-}*/
-
 contract('WeightWagers', accounts => {
   const owner = accounts[0];
   const chubbs = accounts[1]; // Chubbs will never lose weight :(

@@ -4,7 +4,9 @@ import "installed_contracts/oraclize-api/contracts/usingOraclize.sol";
 
 contract WeightWagers is usingOraclize{
 
-  uint rewardMultiplier;
+  /**
+   * Data structures
+   **/
 
   struct Wager {
     uint expiration; //timestamp after which the contract is deemed "expired"
@@ -22,6 +24,20 @@ contract WeightWagers is usingOraclize{
                      //to delete once the wager has been verified
   }
 
+  /**
+   * Contract variables
+   **/
+
+  //The current reward that users will receive (as a percentage
+  //of their wager) after successfully verifying a wager.
+  uint rewardMultiplier;
+
+  //Whether the contract has been emergency stopped
+  bool stopped;
+
+  //The address that deployed the contract
+  address owner;
+
   // The official mapping of all activated wagers
   mapping(address => Wager[]) private wagers;
 
@@ -34,6 +50,34 @@ contract WeightWagers is usingOraclize{
   // wait for the oraclized scale data to return so
   // that we can officially verify the wager 
   mapping(bytes32 => VerifyingWager) private wagersBeingVerified;
+
+  /**
+   * Modifiers
+   */
+
+  /*
+  modifier isOwner () { require (msg.sender == owner); _;}
+  modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
+  modifier paidEnough(uint _price) { emit InPaidEnough(); require(msg.value >= _price); _;}
+  modifier checkValue(uint _sku) {
+    //refund them after pay for item (why it is before, _ checks for logic before func)
+    _;
+    uint _price = items[_sku].price;
+    uint amountToRefund = msg.value - _price;
+    items[_sku].buyer.transfer(amountToRefund);
+  }
+  */
+
+  modifier isOwner () {
+    require (msg.sender == owner); _;
+  }
+  modifier notWhenStopped () {
+    require (!stopped); _;
+  }
+
+  /**
+   * Events
+   **/
 
   // for when a user attempts to create a wager
   event WagerCreated(uint expiration, uint desiredWeightChange, uint wagerAmount, string smartScaleID);
@@ -53,17 +97,30 @@ contract WeightWagers is usingOraclize{
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
 
+  /**
+   * Functions
+   **/
+
   function WeightWagers() payable {
     rewardMultiplier = 1031; //reward multiplier. 1031 represents a 3.1% return.
     OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
 
-  //The user calls this function when they want to create a wager
-  function createWager(uint _expiration, uint _desiredWeightChange, string _smartScaleID) public payable {
-    //This payable function should automatically receive the ether
-    //which is fine! because now if there are problems we can just revert.
-    //But we need to remember to send the ether back in case the callback fails for some reason.
+  function changeRewardMultiplier(uint newRewardMultiplier) public isOwner {
+    rewardMultiplier = newRewardMultiplier;
+  }
 
+  //DJSFIXME You may not need this because public variables have getters and setters
+  /*function getRewardMultiplier() public returns (uint rewardMultiplier) {
+    return rewardMultiplier
+  }*/
+
+  function stopOrStart(bool newStopped) public isOwner {
+    stopped = newStopped;
+  }
+
+  //The user calls this function when they want to create a wager
+  function createWager(uint _expiration, uint _desiredWeightChange, string _smartScaleID) public payable notWhenStopped {
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
     bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
 
@@ -84,9 +141,9 @@ contract WeightWagers is usingOraclize{
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
       delete wagersBeingVerified[myid];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
-        wagerToVerify.wagerer.send(wagerToVerify.wagerAmount * rewardMultiplier / 1000);
         delete wagers[wagerToVerify.wagerer][myVerifyingWager.wagerIndex];
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+        wagerToVerify.wagerer.send(wagerToVerify.wagerAmount * rewardMultiplier / 1000);
       } else {
         emit WagerUnchanged(myid);
       }
