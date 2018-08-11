@@ -23,12 +23,12 @@ function logWatchPromiseTwice(_event) {
 }
 
 contract('WeightWagers', accounts => {
-  const owner = accounts[0];
-  const chubbs = accounts[1]; // Chubbs will never lose weight :(
+  const chubbs = accounts[0]; // Chubbs will never lose weight :(
+  const owner = "0x0000000000000000000000000000000000000000"
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   
-  it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
+  /*it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Chubbs creates a wager.
@@ -190,9 +190,33 @@ contract('WeightWagers', accounts => {
     //Try verifying again to make sure that verified wagers don't go through the verification process again
     const verifyWagersResponse = await weightWagers.verifyWagers({from: billy_halleck});
     assert.equal(verifyWagersResponse.logs.length, 0, 'Billy\'s verifyWagers call emitted some events even though nothing should have been verified');
+  });*/
+  
+  it('Verify that non-owners cannot run functions that have the isOwner modifier', async () => {
+    const weightWagers = await WeightWagers.deployed();
 
+    //Chubbs tries to call setStopped
+    try {
+      const response = await weightWagers.setStopped(true, {from: chubbs});
+    } catch (e) {
+      //Chubbs should get a revert error because he's not the owner
+      assert.isTrue(e.message.startsWith("VM Exception while processing transaction: revert"));
+    }
   });
 
+  it('Verify that owners can emergency stop the createWager function', async () => {
+    const weightWagers = await WeightWagers.deployed();
+    console.log(chubbs);
+    console.log(owner);
+
+    //Emergency stop the contract
+    const response = await weightWagers.setStopped(true, {from: owner});
+    console.log(response.logs[0].args);
+
+    //await weightWagers.createWager(1000, 20, "always200Pounds", {from: owner, value: 23456});
+    /*let log = response.logs[0];
+    assert.equal(log.event, 'WagerCreated', 'WagerCreated not emitted.');*/
+  });
 });
 
 

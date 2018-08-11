@@ -56,6 +56,7 @@ contract WeightWagers is usingOraclize{
    */
 
   /*
+  DJSFIXME Delete this
   modifier isOwner () { require (msg.sender == owner); _;}
   modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
   modifier paidEnough(uint _price) { emit InPaidEnough(); require(msg.value >= _price); _;}
@@ -69,10 +70,12 @@ contract WeightWagers is usingOraclize{
   */
 
   modifier isOwner () {
-    require (msg.sender == owner); _;
+    //require (msg.sender == owner);
+    _;
   }
   modifier notWhenStopped () {
-    require (!stopped); _;
+    require (!stopped);
+    _;
   }
 
   /**
@@ -96,27 +99,41 @@ contract WeightWagers is usingOraclize{
   // wager but one where the user hasn't actually achieved
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
+  event WhoIsOwner(address owner, address sender);
 
   /**
    * Functions
    **/
 
   function WeightWagers() payable {
+    owner = msg.sender;
     rewardMultiplier = 1031; //reward multiplier. 1031 represents a 3.1% return.
     OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
 
-  function changeRewardMultiplier(uint newRewardMultiplier) public isOwner {
+  function setRewardMultiplier(uint newRewardMultiplier) public isOwner {
     rewardMultiplier = newRewardMultiplier;
   }
 
   //DJSFIXME You may not need this because public variables have getters and setters
-  /*function getRewardMultiplier() public returns (uint rewardMultiplier) {
-    return rewardMultiplier
-  }*/
+  function getRewardMultiplier() public returns (uint rewardMultiplier) {
+    return rewardMultiplier;
+  }
 
-  function stopOrStart(bool newStopped) public isOwner {
+  function setStopped(bool newStopped) public {
+    emit WhoIsOwner(owner, msg.sender);
     stopped = newStopped;
+  }
+
+  function getOwner() public returns (address owner) {
+    emit WhoIsOwner(owner, msg.sender);
+    return owner;
+  }
+
+  //DJSFIXME You may not need this because public variables have getters and setters
+  function getStopped() public returns (bool stopped, address owner) {
+    emit WhoIsOwner(owner, msg.sender);
+    return (stopped, owner);
   }
 
   //The user calls this function when they want to create a wager

@@ -89,6 +89,7 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       weightWagers.deployed().then((instance) => {
         weightWagersInstance = instance
+        console.log(instance);
 
         /*weightWagersInstance.WagerCreated((err, value) => {
           console.log(JSON.stringify(value, null, 2));
@@ -99,6 +100,12 @@ class App extends Component {
         const verifiedWagerEvent = weightWagersInstance.WagerVerified();
         const expiredWagerEvent = weightWagersInstance.WagerExpired();
         const unchangedWagerEvent = weightWagersInstance.WagerUnchanged();
+        const whoIsOwnerEvent = weightWagersInstance.WhoIsOwner();
+
+        whoIsOwnerEvent.watch(function(error, result){
+          console.log('Who Is Owner was emitted');
+          console.log({error, result});
+        });
 
         /*createWagerEvent.watch(function(error, result){
           console.log('WagerCreated was emitted');
@@ -288,23 +295,44 @@ class App extends Component {
     this[inputName] = e.target.value;
   }
 
+  onEmergencyStop(newValue, e) {
+    this.state.weightWagersInstance.setStopped(newValue, {from: this.state.account}).then( (result, err) => {
+      this.setState({
+        stopped: newValue,
+      });
+    });
+  }
+
   render() {
     return (
       <div className="App">
         <NotificationSystem ref="notificationSystem" />
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+            <span className="account">Account: {this.state.account || "n/a"}</span>
         </nav>
-
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
               <img src={WeightWagersPng} className="logoImage"/>
-              {!this.state.account &&
+              {this.state.account && this.state.account === "0xaf1110277bf0a45c7138afef2760518900150a7c" &&
                 <div>
                   <h1>
-                    Account: You are not logged in
+                    Admin controls
                   </h1>
+                  <div>
+                    {!this.state.stopped &&
+                      <button onClick={this.onEmergencyStop.bind(this, false)} className="submitButton danger">Disable Wager Creation</button>
+                    }
+                    {this.state.stopped &&
+                      <button onClick={this.onEmergencyStop.bind(this, true)} className="submitButton danger">Enable Wager Creation</button>
+                    }
+                  </div>
+                  <div>
+                  </div>
+                </div>
+              }
+              {!this.state.account &&
+                <div>
                   <h1>
                     Log in with metamask and refresh this page
                   </h1>
@@ -349,9 +377,6 @@ class App extends Component {
               }
               {this.state.account && 
                 <div>
-                  <h1>
-                    Account: {this.state.account}
-                  </h1>
                   <h1>Create a new wager</h1>
                   <div className="inputDiv">
                     <label htmlFor="expiration">Expiration (in seconds)</label>

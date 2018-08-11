@@ -98,6 +98,14 @@ code {
   margin-right: auto;
 }
 
+.account {
+  color: white;
+}
+
+.danger {
+  background-color: red;
+}
+
 table, th, td {
   border: 1px solid black;
   margin: auto;
