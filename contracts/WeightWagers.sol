@@ -120,18 +120,18 @@ contract WeightWagers is usingOraclize{
     return rewardMultiplier;
   }
 
-  function setStopped(bool newStopped) public {
+  function setStopped(bool newStopped) public isOwner {
     emit WhoIsOwner(owner, msg.sender);
     stopped = newStopped;
   }
 
-  function getOwner() public returns (address owner) {
+  function getOwner() public returns (address) {
     emit WhoIsOwner(owner, msg.sender);
     return owner;
   }
 
   //DJSFIXME You may not need this because public variables have getters and setters
-  function getStopped() public returns (bool stopped, address owner) {
+  function getStopped() public returns (bool, address) {
     emit WhoIsOwner(owner, msg.sender);
     return (stopped, owner);
   }
