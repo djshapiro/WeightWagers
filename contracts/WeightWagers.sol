@@ -108,6 +108,7 @@ contract WeightWagers is usingOraclize{
 
   function WeightWagers() payable {
     owner = msg.sender;
+    stopped = false;
     rewardMultiplier = 1031; //reward multiplier. 1031 represents a 3.1% return.
     OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
@@ -116,20 +117,24 @@ contract WeightWagers is usingOraclize{
     rewardMultiplier = newRewardMultiplier;
   }
 
-  //DJSFIXME You may not need this because public variables have getters and setters
+  /*//DJSFIXME You may not need this because public variables have getters and setters
   function getRewardMultiplier() public returns (uint rewardMultiplier) {
     return rewardMultiplier;
-  }
+  }*/
 
   function setStopped(bool newStopped) public isOwner {
     stopped = newStopped;
   }
 
-  //DJSFIXME You may not need this because public variables have getters and setters
+  function getAdminStuff() public returns (bool, uint) {
+    return (stopped, rewardMultiplier);
+  }
+
+  /*//DJSFIXME You may not need this because public variables have getters and setters
   function getStopped() public returns (bool, address) {
     emit WhoIsOwner(owner, msg.sender);
     return (stopped, owner);
-  }
+  }*/
 
   //The user calls this function when they want to create a wager
   function createWager(uint _expiration, uint _desiredWeightChange, string _smartScaleID) public payable notWhenStopped {

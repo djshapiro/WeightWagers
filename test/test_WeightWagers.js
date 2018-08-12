@@ -24,7 +24,7 @@ function logWatchPromiseTwice(_event) {
 
 contract('WeightWagers', accounts => {
   const chubbs = accounts[0]; // Chubbs will never lose weight :(
-  const owner = accounts[1];
+  const owner = accounts[1]; //The person who owns the contract
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   

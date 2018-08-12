@@ -19,11 +19,14 @@ class App extends Component {
       wagers: null,
       weightWagersInstance: null,
       account: null,
+      rewardMultiplier: null,
+      stopped: null,
     }
 
     this.instantiateContract = this.instantiateContract.bind(this);
     this.contractEvent = this.contractEvent.bind(this);
     this.lastIndex = 0;
+    this.owner = "0xaf1110277bf0a45c7138afef2760518900150a7c";
   }
 
   componentWillMount() {
@@ -89,7 +92,6 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       weightWagers.deployed().then((instance) => {
         weightWagersInstance = instance
-        console.log(instance);
 
         /*weightWagersInstance.WagerCreated((err, value) => {
           console.log(JSON.stringify(value, null, 2));
@@ -169,6 +171,15 @@ class App extends Component {
           weightWagersInstance: weightWagersInstance,
           account: accounts[0],
         });
+        if (accounts[0] === this.owner) {
+          return weightWagersInstance.getAdminStuff.call({from: accounts[0]})
+        }
+      }).then((result, err) => {
+        _this.setState({
+          stopped: result[0],
+          rewardMultiplier: result[1].toNumber(),
+        });
+      });
       //  return weightWagersInstance.verifyWagers({from: accounts[0]});
       //}).then((result, err) => {
       //  console.log(result);
@@ -183,7 +194,6 @@ class App extends Component {
       }).then((result) => {
         // Update state with the result.
         return this.setState({ storageValue: result.c[0] })*/
-      })
     })
   }
 
@@ -314,17 +324,17 @@ class App extends Component {
           <div className="pure-g">
             <div className="pure-u-1-1">
               <img src={WeightWagersPng} className="logoImage"/>
-              {this.state.account && this.state.account === "0xaf1110277bf0a45c7138afef2760518900150a7c" &&
+              {this.state.account && this.state.account === this.owner &&
                 <div>
                   <h1>
                     Admin controls
                   </h1>
                   <div>
                     {!this.state.stopped &&
-                      <button onClick={this.onEmergencyStop.bind(this, false)} className="submitButton danger">Disable Wager Creation</button>
+                      <button onClick={this.onEmergencyStop.bind(this, true)} className="submitButton danger">Disable Wager Creation</button>
                     }
                     {this.state.stopped &&
-                      <button onClick={this.onEmergencyStop.bind(this, true)} className="submitButton danger">Enable Wager Creation</button>
+                      <button onClick={this.onEmergencyStop.bind(this, false)} className="submitButton danger">Enable Wager Creation</button>
                     }
                   </div>
                   <div>

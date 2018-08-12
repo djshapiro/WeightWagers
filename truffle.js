@@ -1,4 +1,6 @@
-/*var bip39 = require("bip39");
+/*
+DJSFIXME You can probably delete all this now
+var bip39 = require("bip39");
 var hdkey = require("ethereumjs-wallet/hdkey");
 
 var mnemonic = "chuckle dad sword reduce unable yellow toddler pitch under vanish habit onion"
@@ -15,7 +17,6 @@ module.exports = {
       host: "localhost",
       port: 8545,
       network_id: "*", // Match any network id
-      //from: address,
     }
   },
   solc: {
