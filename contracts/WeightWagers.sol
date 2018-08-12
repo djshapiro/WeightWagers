@@ -56,7 +56,7 @@ contract WeightWagers is usingOraclize{
    */
 
   /*
-  DJSFIXME Delete this
+  DJSFIXME Delete this block of code
   modifier isOwner () { require (msg.sender == owner); _;}
   modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
   modifier paidEnough(uint _price) { emit InPaidEnough(); require(msg.value >= _price); _;}
@@ -70,7 +70,7 @@ contract WeightWagers is usingOraclize{
   */
 
   modifier isOwner () {
-    //require (msg.sender == owner);
+    require (msg.sender == owner);
     _;
   }
   modifier notWhenStopped () {
@@ -99,6 +99,7 @@ contract WeightWagers is usingOraclize{
   // wager but one where the user hasn't actually achieved
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
+  //DJSFIXME DELETE THIS
   event WhoIsOwner(address owner, address sender);
 
   /**
@@ -121,13 +122,7 @@ contract WeightWagers is usingOraclize{
   }
 
   function setStopped(bool newStopped) public isOwner {
-    emit WhoIsOwner(owner, msg.sender);
     stopped = newStopped;
-  }
-
-  function getOwner() public returns (address) {
-    emit WhoIsOwner(owner, msg.sender);
-    return owner;
   }
 
   //DJSFIXME You may not need this because public variables have getters and setters
