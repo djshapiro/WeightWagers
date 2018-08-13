@@ -24,7 +24,6 @@ class App extends Component {
     }
 
     this.instantiateContract = this.instantiateContract.bind(this);
-    this.contractEvent = this.contractEvent.bind(this);
     this.lastIndex = 0;
     this.owner = "0xaf1110277bf0a45c7138afef2760518900150a7c";
   }
@@ -102,12 +101,6 @@ class App extends Component {
         const verifiedWagerEvent = weightWagersInstance.WagerVerified();
         const expiredWagerEvent = weightWagersInstance.WagerExpired();
         const unchangedWagerEvent = weightWagersInstance.WagerUnchanged();
-        const whoIsOwnerEvent = weightWagersInstance.WhoIsOwner();
-
-        whoIsOwnerEvent.watch(function(error, result){
-          console.log('Who Is Owner was emitted');
-          console.log({error, result});
-        });
 
         /*createWagerEvent.watch(function(error, result){
           console.log('WagerCreated was emitted');
@@ -197,10 +190,6 @@ class App extends Component {
     })
   }
 
-  contractEvent(err, value) {
-    console.log(JSON.stringify(value, null, 2));
-  }
-
   onFormSubmit(a, b, c) {
     const expiration = this.expiration || 0;
     const desiredWeightChange = this.desiredWeightChange || 0;
@@ -244,6 +233,10 @@ class App extends Component {
         });
       });
     //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
+    }).catch((e) => {
+      this._notificationSystem.editNotification(notificationID, {
+        message: 'Wager creation is temporarily offline. Try again later.',
+      });
     });
   }
 

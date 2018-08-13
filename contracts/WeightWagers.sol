@@ -99,8 +99,6 @@ contract WeightWagers is usingOraclize{
   // wager but one where the user hasn't actually achieved
   // their goal weight yet
   event WagerUnchanged(bytes32 myid);
-  //DJSFIXME DELETE THIS
-  event WhoIsOwner(address owner, address sender);
 
   /**
    * Functions
