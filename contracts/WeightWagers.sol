@@ -124,7 +124,7 @@ contract WeightWagers is usingOraclize{
     stopped = newStopped;
   }
 
-  function getAdminStuff() public returns (bool, uint) {
+  function getAdminStuff() public view returns (bool, uint) {
     return (stopped, rewardMultiplier);
   }
 
@@ -136,6 +136,8 @@ contract WeightWagers is usingOraclize{
 
   //The user calls this function when they want to create a wager
   function createWager(uint _expiration, uint _desiredWeightChange, string _smartScaleID) public payable notWhenStopped {
+    require(_desiredWeightChange > 0 && _desiredWeightChange < 2000);
+    require(_expiration > 0);
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
     bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
 
@@ -147,14 +149,14 @@ contract WeightWagers is usingOraclize{
     if (msg.sender != oraclize_cbAddress()) revert();
     if (wagersBeingActivated[myid].wagerer != address(0)) {
       Wager memory newWager = wagersBeingActivated[myid];
+      delete wagersBeingActivated[myid];
       newWager.startWeight = parseInt(result);
       wagers[newWager.wagerer].push(newWager);
-      delete wagersBeingActivated[myid];
       emit WagerActivated(newWager.wagerer, newWager.wagerAmount);
     } else if (wagersBeingVerified[myid].wagerer != address(0)) {
       VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
-      Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
       delete wagersBeingVerified[myid];
+      Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
       if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
         delete wagers[wagerToVerify.wagerer][myVerifyingWager.wagerIndex];
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
