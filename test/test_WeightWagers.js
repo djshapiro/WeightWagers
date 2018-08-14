@@ -1,5 +1,7 @@
 const WeightWagers = artifacts.require('WeightWagers');
 
+//Helper function for watching for asynchronous events.
+//This is necessary when oraclizing.
 function logWatchPromise(_event, numOfTimes = 1) {
   return new Promise((resolve, reject) => {
     let numCalls = 0;
@@ -18,6 +20,7 @@ function logWatchPromise(_event, numOfTimes = 1) {
   });
 }
 
+//Helper functional for watching for two of an event
 function logWatchPromiseTwice(_event) {
   return logWatchPromise(_event, 2);
 }
@@ -28,6 +31,9 @@ contract('WeightWagers', accounts => {
   const al_roker = accounts[2]; // Al will lose weight very quickly
   const billy_halleck = accounts[3]; // Billy is cursed and will lose weight gradually
   
+  //This test is simply for
+  //  1) creating a wager
+  //  2) making sure that the oraclized smart scale data returns and activates the wager
   it('calling createWager should emit a WagerCreated event follow by a WagerActivated event', async () => {
     const weightWagers = await WeightWagers.deployed();
 
@@ -43,27 +49,33 @@ contract('WeightWagers', accounts => {
     assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 
     //Finally, call getWagers() for Chubbs to ensure
-    //that he has a wager.
+    //we can see his activated wager.
     const chubbsWagers = await weightWagers.getWagers({from: chubbs});
     assert.equal(chubbsWagers[1][0], 20, 'Chubbs does not have the correct target weight');
     assert.equal(chubbsWagers[2][0], 23456, 'Chubbs does not have the correct amount');
 
-    //And just for a reality check, make sure Al has no wagers.
+    //And just for a reality check, make sure Al has no wagers,
+    //since he hasn't created any wagers.
     const alWagers = await weightWagers.getWagers({from: al_roker});
     assert.deepEqual(alWagers[1], [], "Al's target weights are not an empty array");
     assert.deepEqual(alWagers[2], [], "Al's wager amounts are not an empty array");
 
   });
   
+  //This test relies on data from the first test.
+  //Here we attempt to
+  //  1) verify the wager created in the first test
+  //  2) make sure that the oraclized smart scale data returns and continues the verification process
+  //  3) make sure the contract emits the "WagerUnchanged" event since Chubbs hasn't lost the weight yet
   it('create a wager and attempt to verify it without having lost the weight', async () => {
     const weightWagers = await WeightWagers.deployed();
 
+    //Begin the verification process
     const verifyResponse = await weightWagers.verifyWager(0, {from: chubbs});
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
 
-    //Set up listener to make sure the wager gets
-    //activated once the oracle returns data.
+    //Make sure the wager is unchanged after verification completes
     const logScaleWatcher = logWatchPromise(weightWagers.WagerUnchanged({ fromBlock: 'latest'} ));
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerUnchanged', 'WagerUnchanged not emitted.');
@@ -75,6 +87,13 @@ contract('WeightWagers', accounts => {
     assert.equal(chubbsWagers[2][0], 23456, 'Chubbs does not have the correct amount');
   });
 
+  //This test involves attempting to verify a wager after it has expired.
+  //The steps involved:
+  //  1) Create a wager that expires in one second
+  //  2) Wait for that wager to get activated
+  //  3) Verify the new wager
+  //  4) Get the WagerExpired event
+  //  5) Verify that the new wager has been deleted
   it('create a wager and attempt to verify it after it has expired', async () => {
     const weightWagers = await WeightWagers.deployed();
 
@@ -99,6 +118,8 @@ contract('WeightWagers', accounts => {
     assert.equal(chubbsWagers[1][0], 20, "Chubbs' first wager has an incorrect desired weight change");
     assert.equal(chubbsWagers[1][1], 40, "Chubbs' second wager has an incorrect desired weight change");
 
+    //Begin the verification process on just the new wager and
+    //immediately get back the WagerExpired event
     const verifyResponse = await weightWagers.verifyWager(1, {from: chubbs});
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerExpired', 'WagerExpired not emitted.');
@@ -111,6 +132,13 @@ contract('WeightWagers', accounts => {
     assert.equal(chubbsWagers[1][1], 0, "Chubbs' second wager has a desired weight change that isn't zero.");
   });
 
+  //This test is for verifying a wager that the user has successfully completed
+  //  1) Create a wager
+  //  2) Wait for the wager to activate
+  //  3) Verify the wager
+  //  4) Wait for contract to emit the "WagerVerified" event
+  //  5) Verify that the user was given their initial wager plus a 3.1% reward
+  //  6) Verify that the wager has been deleted
   it('create a wager and attempt to verify it after having lost the weight', async () => {
     const weightWagers = await WeightWagers.deployed();
 
@@ -125,14 +153,14 @@ contract('WeightWagers', accounts => {
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerActivated', 'WagerActivated not emitted.');
 
+    //Begin the verification process
     const verifyResponse = await weightWagers.verifyWager(0, {from: al_roker});
     log = verifyResponse.logs[0];
     assert.equal(log.event, 'WagerBeingVerified', 'WagerBeingVerified not emitted.');
 
     const alBeginningBalance = await web3.eth.getBalance(al_roker)
 
-    //Set up listener to make sure the wager gets
-    //activated once the oracle returns data.
+    //Wait to get the WagerVerified event
     logScaleWatcher = logWatchPromise(weightWagers.WagerVerified({ fromBlock: 'latest'} ));
     log = await logScaleWatcher;
     assert.equal(log.event, 'WagerVerified', 'WagerVerified not emitted.');
@@ -149,6 +177,14 @@ contract('WeightWagers', accounts => {
     assert.equal(alWagers[2][0], 0, 'Al does not have the correct amount');
   });
 
+  //This test makes sure that the verifyWagers method verifies all
+  //of the user's wagers
+  //  1) Create two wagers
+  //  2) Wait for both to activate
+  //  3) Call verifyWagers
+  //  4) Wait for contract to emit "WagerVerified" twice, denoting that both wagers were verified
+  //  5) Verify that the wagers were deleted
+  //  6) Verify that running verifyWagers again doesn't do anything
   it("verifyWagers verifies both of an address' active wagers", async () => {
     const weightWagers = await WeightWagers.deployed();
 
@@ -191,7 +227,9 @@ contract('WeightWagers', accounts => {
     const verifyWagersResponse = await weightWagers.verifyWagers({from: billy_halleck});
     assert.equal(verifyWagersResponse.logs.length, 0, 'Billy\'s verifyWagers call emitted some events even though nothing should have been verified');
   });
-  
+
+  //This test ensures that addresses that aren't the owner
+  //can't call functions that have the isOwner modifier
   it('Verify that non-owners cannot run functions that have the isOwner modifier', async () => {
     const weightWagers = await WeightWagers.deployed();
 
@@ -204,6 +242,11 @@ contract('WeightWagers', accounts => {
     }
   });
 
+  //This test ensures thas the emergency stop does its job
+  //  1) Emergency stop the contract
+  //  2) Attempt to create a wager and get a revert error - this is the expected behavior when the contract is stopped
+  //  3) Emergency start the contract
+  //  4) Attempt to create a wager and don't get an error
   it('Verify that the owner can emergency stop the createWager function', async () => {
     const weightWagers = await WeightWagers.deployed();
 
