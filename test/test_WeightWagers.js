@@ -204,7 +204,7 @@ contract('WeightWagers', accounts => {
     }
   });
 
-  it('Verify that owners can emergency stop the createWager function', async () => {
+  it('Verify that the owner can emergency stop the createWager function', async () => {
     const weightWagers = await WeightWagers.deployed();
 
     //Emergency stop the contract

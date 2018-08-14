@@ -1,8 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "installed_contracts/oraclize-api/contracts/usingOraclize.sol";
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract WeightWagers is usingOraclize{
+  using SafeMath for uint;
 
   /**
    * Data structures
@@ -30,13 +32,13 @@ contract WeightWagers is usingOraclize{
 
   //The current reward that users will receive (as a percentage
   //of their wager) after successfully verifying a wager.
-  uint rewardMultiplier;
+  uint private rewardMultiplier;
 
   //Whether the contract has been emergency stopped
-  bool stopped;
+  bool private stopped;
 
   //The address that deployed the contract
-  address owner;
+  address private owner;
 
   // The official mapping of all activated wagers
   mapping(address => Wager[]) private wagers;
@@ -55,24 +57,11 @@ contract WeightWagers is usingOraclize{
    * Modifiers
    */
 
-  /*
-  DJSFIXME Delete this block of code
-  modifier isOwner () { require (msg.sender == owner); _;}
-  modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
-  modifier paidEnough(uint _price) { emit InPaidEnough(); require(msg.value >= _price); _;}
-  modifier checkValue(uint _sku) {
-    //refund them after pay for item (why it is before, _ checks for logic before func)
-    _;
-    uint _price = items[_sku].price;
-    uint amountToRefund = msg.value - _price;
-    items[_sku].buyer.transfer(amountToRefund);
-  }
-  */
-
   modifier isOwner () {
     require (msg.sender == owner);
     _;
   }
+
   modifier notWhenStopped () {
     require (!stopped);
     _;
@@ -141,8 +130,8 @@ contract WeightWagers is usingOraclize{
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
     bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
 
-    wagersBeingActivated[myID] = Wager(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
-    emit WagerCreated(now + _expiration, _desiredWeightChange, msg.value, _smartScaleID);
+    wagersBeingActivated[myID] = Wager(now.add(_expiration), _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
+    emit WagerCreated(now.add(_expiration), _desiredWeightChange, msg.value, _smartScaleID);
   }
 
   function __callback(bytes32 myid, string result) public {
@@ -157,10 +146,10 @@ contract WeightWagers is usingOraclize{
       VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
       delete wagersBeingVerified[myid];
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
-      if (parseInt(result) <= (wagerToVerify.startWeight - wagerToVerify.desiredWeightChange)) {
+      if (parseInt(result) <= (wagerToVerify.startWeight.sub(wagerToVerify.desiredWeightChange))) {
         delete wagers[wagerToVerify.wagerer][myVerifyingWager.wagerIndex];
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
-        wagerToVerify.wagerer.send(wagerToVerify.wagerAmount * rewardMultiplier / 1000);
+        wagerToVerify.wagerer.send((wagerToVerify.wagerAmount.mul(rewardMultiplier)).div(1000));
       } else {
         emit WagerUnchanged(myid);
       }

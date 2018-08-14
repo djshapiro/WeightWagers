@@ -168,10 +168,12 @@ class App extends Component {
           return weightWagersInstance.getAdminStuff.call({from: accounts[0]})
         }
       }).then((result, err) => {
-        _this.setState({
-          stopped: result[0],
-          rewardMultiplier: result[1].toNumber(),
-        });
+        if (result) {
+          _this.setState({
+            stopped: result[0],
+            rewardMultiplier: result[1].toNumber(),
+          });
+        }
       });
       //  return weightWagersInstance.verifyWagers({from: accounts[0]});
       //}).then((result, err) => {
@@ -236,6 +238,7 @@ class App extends Component {
     }).catch((e) => {
       this._notificationSystem.editNotification(notificationID, {
         message: 'Wager creation is temporarily offline. Try again later.',
+        autoDismiss: 3,
       });
     });
   }
