@@ -72,13 +72,6 @@ class App extends Component {
   }
 
   instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
-
     const contract = require('truffle-contract')
     const weightWagers = contract(WeightWagers)
     weightWagers.setProvider(this.state.web3.currentProvider)
@@ -91,68 +84,6 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       weightWagers.deployed().then((instance) => {
         weightWagersInstance = instance
-
-        /*weightWagersInstance.WagerCreated((err, value) => {
-          console.log(JSON.stringify(value, null, 2));
-        });*/
-        const createWagerEvent = weightWagersInstance.WagerCreated();
-        const activateWagerEvent = weightWagersInstance.WagerActivated();
-        const beingVerifiedEvent = weightWagersInstance.WagerBeingVerified();
-        const verifiedWagerEvent = weightWagersInstance.WagerVerified();
-        const expiredWagerEvent = weightWagersInstance.WagerExpired();
-        const unchangedWagerEvent = weightWagersInstance.WagerUnchanged();
-
-        /*createWagerEvent.watch(function(error, result){
-          console.log('WagerCreated was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });
-
-        activateWagerEvent.watch(function(error, result){
-          console.log('WagerActivated was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });
-
-        beingVerifiedEvent.watch(function(error, result){
-          console.log('WagerBeingVerified was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });
-
-        verifiedWagerEvent.watch(function(error, result){
-          console.log('WagerVerified was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });
-
-        expiredWagerEvent.watch(function(error, result){
-          console.log('WagerExpired was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });
-
-        unchangedWagerEvent.watch(function(error, result){
-          console.log('WagerUnchanged was emitted');
-          console.log({error, result});
-          if(!error) {
-            console.log(result);
-          }
-        });*/
-
-
-
-
         return weightWagersInstance.getWagers({from: accounts[0]});
       }).then((result, err) => {
         //Returning an array of arrays in the best way
@@ -175,21 +106,7 @@ class App extends Component {
           });
         }
       });
-      //  return weightWagersInstance.verifyWagers({from: accounts[0]});
-      //}).then((result, err) => {
-      //  console.log(result);
-
-        //return weightWagersInstance.createWager(20, 30, "always200Pounds", {from: accounts[0]});
-
-        // Stores a given value, 5 by default.
-      /*  return simpleStorageInstance.set(5, {from: accounts[0]})
-      }).then((result) => {
-        // Get the value from the contract to prove it worked.
-        return simpleStorageInstance.get.call(accounts[0])
-      }).then((result) => {
-        // Update state with the result.
-        return this.setState({ storageValue: result.c[0] })*/
-    })
+    });
   }
 
   onFormSubmit(a, b, c) {
@@ -234,7 +151,6 @@ class App extends Component {
           });
         });
       });
-    //DJSFIXME Have to add a listener to watch for a WagerActivated event with the sender's address
     }).catch((e) => {
       this._notificationSystem.editNotification(notificationID, {
         message: 'Wager creation is temporarily offline. Try again later.',

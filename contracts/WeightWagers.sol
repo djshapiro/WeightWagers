@@ -23,9 +23,9 @@ contract WeightWagers is usingOraclize{
     uint startWeight; //the starting weight of the wagerer
   }
 
-  /* A structure used temporarily while waiting
-   * for smart scale data to finish verifying
-   */ a wager
+  // A structure used temporarily while waiting
+  // for smart scale data to finish verifying
+  //  a wager
   struct VerifyingWager {
     address wagerer; //the address of the person making the wager
     uint wagerIndex; //the index of the wager in the wagers array - we have to
@@ -119,7 +119,7 @@ contract WeightWagers is usingOraclize{
 
   /**
    * @dev Sets a new reward multiplier for the function. 1031 equals a 3.1% return.
-   * @param newRewardMultpilier Desired new value for the reward multiplier 
+   * @param newRewardMultiplier Desired new value for the reward multiplier 
    */
   function setRewardMultiplier(uint newRewardMultiplier) public isOwner {
     rewardMultiplier = newRewardMultiplier;
