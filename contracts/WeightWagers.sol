@@ -126,7 +126,8 @@ contract WeightWagers is usingOraclize{
   }
 
   /**
-   * @dev Sets the value of the stopped variable. This decides whether the contract is stopped.
+   * @dev Sets the value of the stopped variable.
+   *   This decides whether the contract is stopped.
    * @param newStopped Desired new value for the stopped variable
    */
   function setStopped(bool newStopped) public isOwner {
@@ -168,23 +169,59 @@ contract WeightWagers is usingOraclize{
     emit WagerCreated(now.add(_expiration), _desiredWeightChange, msg.value, _smartScaleID);
   }
 
+  /**
+   * @dev This is the callback function used by Oraclize. This function will
+   *   either complete the wager creation process or the wager verification
+   *   process.
+   * @param myid The unique ID of the call that we're getting data for
+   * @param result The value returned from the URL we called with Oraclize
+   */
   function __callback(bytes32 myid, string result) public {
+    // Only let Oraclize call this function.
     if (msg.sender != oraclize_cbAddress()) revert();
+
+    // Is this for a wager being activated?
     if (wagersBeingActivated[myid].wagerer != address(0)) {
+      // This is for a wager being activated, so get that wager's information.
       Wager memory newWager = wagersBeingActivated[myid];
+
+      // Remove the wager from the "being activated" mapping because it
+      // has graduated to "activated"
       delete wagersBeingActivated[myid];
+
+      // Add the user's start weight to the wager. This is all we needed
+      // Oraclize for.
       newWager.startWeight = parseInt(result);
+
+      // Add this wager to the user's wagers.
       wagers[newWager.wagerer].push(newWager);
       emit WagerActivated(newWager.wagerer, newWager.wagerAmount);
+
+    // Is this for a wager being verified?
     } else if (wagersBeingVerified[myid].wagerer != address(0)) {
+      // This is for a wager being verified, so get some of
+      // that wager's information.
       VerifyingWager memory myVerifyingWager = wagersBeingVerified[myid];
+
+      // Remove the wager from the "being verified" mapping because
+      // we're about to finish the verification process.
       delete wagersBeingVerified[myid];
+
+      // User the information we got from wagersBeingVerified to locate
+      // the wager the user wants to verify.
       Wager memory wagerToVerify = wagers[myVerifyingWager.wagerer][myVerifyingWager.wagerIndex];
+
+      // Did the user actually lose the weight?
       if (parseInt(result) <= (wagerToVerify.startWeight.sub(wagerToVerify.desiredWeightChange))) {
+        // The user lost the weight! So remove their wager.
         delete wagers[wagerToVerify.wagerer][myVerifyingWager.wagerIndex];
         emit WagerVerified(wagerToVerify.wagerer, wagerToVerify.wagerAmount);
+
+        // Send the user their wager plus a reward.
         wagerToVerify.wagerer.send((wagerToVerify.wagerAmount.mul(rewardMultiplier)).div(1000));
       } else {
+        // The user didn't lose the weight. Don't do anything since the user
+        // still has time to lose the weight.
         emit WagerUnchanged(myid);
       }
     }
@@ -230,12 +267,25 @@ contract WeightWagers is usingOraclize{
     }
   }
 
+  /**
+   * @dev Gets information on all the user's wagers. Users of this function
+   *   will have to do some data transformations to get data in a useful format
+   *   (i.e. an array of wagers). This is because Solidity cannot return an array
+   *   of structs.
+   * @return expirations an array of the expiration timestamps of all the user's wagers
+   * @return desiredWeightChanges an array of the desired weight changes of all the 
+   *   user's wagers
+   * @return values an array of the wager values of all the user's wagers
+   * @return weights an array of the start weights of all the user's wagers.
+   */
   function getWagers() public view returns (uint[] memory expirations, uint[] memory desiredWeightChanges, uint[] memory values, uint[] memory weights) {
+    // Create temporary arrays to hold the values
     expirations = new uint[](wagers[msg.sender].length);
     desiredWeightChanges = new uint[](wagers[msg.sender].length);
     values = new uint[](wagers[msg.sender].length);
     weights = new uint[](wagers[msg.sender].length);
 
+    // Loop through arrays and gather their values
     for (uint ii = 0; ii < wagers[msg.sender].length; ii++) {
         Wager memory wager = wagers[msg.sender][ii];
         expirations[ii] = wager.expiration;
@@ -244,6 +294,7 @@ contract WeightWagers is usingOraclize{
         weights[ii] = wager.startWeight;
     }
 
+    // return the values
     return (expirations, desiredWeightChanges, values, weights);
   }
 
