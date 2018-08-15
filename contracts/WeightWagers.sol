@@ -37,14 +37,14 @@ contract WeightWagers is usingOraclize{
    * Contract variables
    */
 
-  //The current reward that users will receive (as a percentage
-  //of their wager) after successfully verifying a wager.
+  // The current reward that users will receive (as a percentage
+  // of their wager) after successfully verifying a wager.
   uint private rewardMultiplier;
 
-  //Whether the contract has been emergency stopped
+  // Whether the contract has been emergency stopped
   bool private stopped;
 
-  //The address that deployed the contract
+  // The address that deployed the contract
   address private owner;
 
   // The official mapping of all activated wagers
@@ -113,7 +113,7 @@ contract WeightWagers is usingOraclize{
   function WeightWagers() payable {
     owner = msg.sender;
     stopped = false;
-    rewardMultiplier = 1031; //reward multiplier. 1031 represents a 3.1% return.
+    rewardMultiplier = 1031; // 1031 represents a 3.1% return.
     OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
   }
 
@@ -134,6 +134,7 @@ contract WeightWagers is usingOraclize{
   }
 
   /**
+   * @dev Returns values of admin-related variables
    * @return stopped The stopped variable for the contract
    * @return rewardMultiplier The current reward multiplier for the contract
    */
@@ -141,13 +142,28 @@ contract WeightWagers is usingOraclize{
     return (stopped, rewardMultiplier);
   }
 
-  //The user calls this function when they want to create a wager
+  /**
+   * @dev Begins the wager creation process
+   * @param _expiration A uint representing the number of seconds the user 
+   *   gives themselves to meet their goal weight   
+   * @param _desiredWeightChange A uint representing the amount of weight
+   *   the user wants to lose
+   * @param _smartScaleID A string representing the user's smart scale credentials
+   */
   function createWager(uint _expiration, uint _desiredWeightChange, string _smartScaleID) public payable notWhenStopped {
+    // Make sure the inputs make sense
     require(_desiredWeightChange > 0 && _desiredWeightChange < 2000);
     require(_expiration > 0);
+
+    // Construct the URL to call
     string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", _smartScaleID, "/0).value");
+    // Call the URL
     bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
 
+    // Create a wager in the wagersBeingActivated mapping so that the
+    // callback function will have access to everything the user passed in.
+    // We use the ID returned by oraclize_query to uniquely identify
+    // this user's wager.
     wagersBeingActivated[myID] = Wager(now.add(_expiration), _desiredWeightChange, msg.value, _smartScaleID, msg.sender, 0);
     emit WagerCreated(now.add(_expiration), _desiredWeightChange, msg.value, _smartScaleID);
   }
@@ -174,22 +190,41 @@ contract WeightWagers is usingOraclize{
     }
   }
 
+  /**
+   * @dev Begins the wager verification process
+   * @param _wagerIndex The index identifying which of
+   *   the user's wagers to begin verifying
+   */
   function verifyWager(uint _wagerIndex) public {
+    // Find the wager the user wants to verify
     Wager memory wagerToVerify = wagers[msg.sender][_wagerIndex];
+
     if (wagerToVerify.expiration < now) {
+      // The wager has expired. Delete the wager and be done. :( for user
       delete wagers[msg.sender][_wagerIndex];
       emit WagerExpired(msg.sender, wagerToVerify.wagerAmount);
+
     } else {
+      // The wager is still active. Construct the URL to call.
       string memory oraclizeURL = strConcat("json(http://eastern-period-211120.appspot.com/", wagerToVerify.smartScaleID, "/1).value");
+      // Call the URL
       bytes32 myID = oraclize_query("URL", oraclizeURL, 5000000);
+
+      // Put the wager info into a VerifyingWager struct and store it
+      // in the mapping so the callback function knows what the user
+      // was trying to do.
       wagersBeingVerified[myID] = VerifyingWager(msg.sender, _wagerIndex);
       emit WagerBeingVerified(msg.sender, _wagerIndex);
     }
   }
 
+  /**
+   * @dev Begins the wager verification process for all the user's wagers
+   */
   function verifyWagers() public {
     for (uint ii = 0; ii < wagers[msg.sender].length; ii++) {
       if (wagers[msg.sender][ii].expiration != 0) {
+        // This wager is not a "deleted" wager, so begin verifying it
         verifyWager(ii);
       }
     }
