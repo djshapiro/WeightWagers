@@ -76,7 +76,7 @@ Oraclizing is expensive and time-consuming. Expect your wager creation
 and verification calls to take about 30 seconds.
 
 ## Further reading
-- Notes on design choices I made can be found in design_pattern_decisions.md
-- Notes on security-related choices I made can be found in avoiding_common_attacks.md
+- Notes on design choices I made can be found in [design_pattern_decisions.md](./design_pattern_decisions.md).
+- Notes on security-related choices I made can be found in [avoiding_common_attacks.md](./avoiding_common_attacks.md).
 - User stories can be found in [user_stories.md](./user_stories.md)
 
