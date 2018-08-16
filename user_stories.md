@@ -1,0 +1,6 @@
+- As a person who needs motivation to lose weight, I want to be able to bet ether that I will be able hit my goal weight within a certain amount of time so that I'll be more likely to lose weight.
+- As the owner of this app, I want to verify user's start and end weights by connecting to a smart scale so that I can be sure the user hit their goal weight.
+- As a person who hit my goal weight before my wager expired, I want to tell the app to verify my weight so that I can get my reward.
+- As the owner of this app, I want to catch verifying wagers that are expired so that I don't pay out unearned rewards.
+- As the owner of this app, I want to catch verifying wagers that are not expired but also not yet met so that I don't pay out unearned rewards.
+- As the owner of this app, I want to be able to stop wager creation in case malicious activity is detected so that my users don't lose ether.
