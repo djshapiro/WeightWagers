@@ -54,21 +54,21 @@ wager verification).
   - `git clone https://github.com/oraclize/ethereum-bridge ethereum-bridge`
   - `cd ethereum-bridge`
   - `npm install `
-1) Clone the WeightWagers app from github.
-1) Navigate into this app's directory.
-1) Run `npm install`
-1) Run `ganache-cli -m "$(cat ganacheMnemonic)"`. This will start ganache with
+2) Clone the WeightWagers app from github.
+3) Navigate into this app's directory.
+4) Run `npm install`
+5) Run `ganache-cli -m "$(cat ganacheMnemonic)"`. This will start ganache with
    a specific mnemonic.
-1) Run `node bridge -a 9`. This will start ethereum-bridge.
-1) After about a minute, ethereum-bridge will say something that looks like
+6) Run `node bridge -a 9`. This will start ethereum-bridge.
+7) After about a minute, ethereum-bridge will say something that looks like
    "OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);".
    Copy this line and paste it into contracts/WeightWagers.sol in the
    constructor at around line 117. Delete the line in the contract that looks
    like that line.
-1) Run `truffle compile; truffle migrate`
-1) Run `npm run start`
-1) Navigate to localhost:3000 in your browser.
-1) Copy the ganache mnemonic and paste it into metamask. Remember that the
+8) Run `truffle compile; truffle migrate`
+9) Run `npm run start`
+10) Navigate to localhost:3000 in your browser.
+11) Copy the ganache mnemonic and paste it into metamask. Remember that the
    first account is a regular user while the second account is the admin.
 
 ## Notes on using the app
