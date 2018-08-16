@@ -1,3 +1,4 @@
+## Design decisions
 - Any if statements used in the contract are for branching or logic. Whenever the contract requires certain conditions to continue, I use require statements.
 - All contract variables are private.
 - My contract does not auto-deprecate. There is no need for it to do so.
@@ -7,7 +8,10 @@
 - My contract does not have a speed bump. It did not make sense to me to put a speed bump in this contract since users have limited interaction with it.
 - Oraclize offers a way for contracts to get mathematically verified proofs of the information returned from different sources. I did not go that route as users know their own weights and only need for the contract to also know their weight. In fact, if I were to take this to production, I would probably make my own oracle to connect to the smart scale APIs. This would make the oraclizing process cheaper and give me more control over my app. As it stands, if oraclize goes down, my contract is useless.
 - Blocktime cannot be trusted down to the second. However, I still use "now" in my contract to determine whether a wager is expired. This is because, in production, we would be using days, and so the ~10 seconds that "now" could be off by would not really affect anything.
-- Finally, there are many features and ideas I wanted to implemented before I ran out of time. Here are some of my ideas:
+
+## Other ideas
+Finally, there are many features and ideas I wanted to implemented before I ran out of time. Here are some of my ideas:
+
  - Don't rely on the user to verify the wagers. Instead, have the user pre-sign a verifyWager call, store that pre-signed transaction, and broadcast it automatically at the time of expiration.
  - Of course, people can cheat and make their scale say anything. It would be hard to cheat the Naked scale (see the README), but in general, to avoid cheating, we could require users to weight themselves every day and do a little bit of data analysis to verify a decent downward trajectory in the numbers.
  - The wager mappings in the contract could slowly get filled with junk under certain error conditions. It would be nice to have a process in place to remove junk wagers every once in a while.
