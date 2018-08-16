@@ -110,7 +110,7 @@ contract WeightWagers is usingOraclize{
   /**
    * @dev WeightWagers constructor
    */
-  function WeightWagers() payable {
+  function WeightWagers() public payable {
     owner = msg.sender;
     stopped = false;
     rewardMultiplier = 1031; // 1031 represents a 3.1% return.
