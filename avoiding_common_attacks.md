@@ -1,0 +1,6 @@
+- I'm not too concerned with reentrancy with this contract. The __callback function is where the magic happens, and only oraclize can call that. In case oraclize were ever compromised (in which case I'd have bigger problems than reentrancy), I delete wagers from the intermediate data mappings as soon as possible. Once a wager is deleted from that mapping, calling __callback again would do nothing.
+- The same goes for any cross-function race conditions. __callback is the only function that sends ether and only oraclize can call that.
+- This contract is not susceptible to any transaction ordering bugs. Nothing about the data that is sent is secret.
+- My contract is technically susceptible to timestamp manipulation. However, in production, wagers would be measured in days instead of seconds, so a discrepancy of ~10 seconds would not matter.
+- I used SafeMath to prevent against underflow and overflow.
+- My contract is susceptible to a DOS in the __callback function when I send ether to the user after a wager is verified. I'm not aware of a good defense against this, other than sending the ether at the very last possible moment, which I do. Also, this is only possible after successfully completing a wager, so that's an extra obstacle.
