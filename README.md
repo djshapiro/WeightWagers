@@ -99,5 +99,5 @@ and verification calls to take about 30 seconds.
 - User stories can be found in [user_stories.md](./user_stories.md)
 
 ## Contact me
-Please let me know if you have any problems installing or running the my app.
+Please let me know if you have any problems installing or running the app.
 
