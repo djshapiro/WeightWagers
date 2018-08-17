@@ -95,3 +95,6 @@ and verification calls to take about 30 seconds.
 - Notes on security-related choices I made can be found in [avoiding_common_attacks.md](./avoiding_common_attacks.md).
 - User stories can be found in [user_stories.md](./user_stories.md)
 
+## Contact me
+Please let me know if you have any problems installing or running the my app.
+
