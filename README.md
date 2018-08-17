@@ -59,6 +59,7 @@ wager verification).
 1) Clone the WeightWagers app from github with `git clone https://github.com/djshapiro/WeightWagers.git`.
 2) Navigate into this app's directory with `cd WeightWagers`.
 3) Run `npm install`
+4) Run `truffle install oraclize-api`
 
 ### Install ethereum-bridge
 1) Install ethereum-bridge in its own directory (not inside of WeightWagers) 
